@@ -20,6 +20,7 @@
     "core-animated-pages": "Polymer/core-animated-pages#>=0.3.0 <1.0.0",
     "paper-elements": "Polymer/paper-elements#>=0.3.0 <1.0.0",
     "nuxeo-elements": "nelsonsilva/nuxeo-elements#master",
-    "sampler-scaffold": "Polymer/sampler-scaffold#>=0.3.0 <1.0.0"
- }
+    "sampler-scaffold": "Polymer/sampler-scaffold#>=0.3.0 <1.0.0",
+    "flatiron-director": "PolymerLabs/flatiron-director#>=0.3.0 <1.0.0"
+  }
 }
