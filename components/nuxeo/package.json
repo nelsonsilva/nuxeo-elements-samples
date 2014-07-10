@@ -1,0 +1,39 @@
+{
+  "name": "nuxeo",
+  "description": "JavaScript client library for Nuxeo API",
+  "version": "0.2.0",
+  "main": "./lib/node/nuxeo",
+  "author": "Nuxeo (http://www.nuxeo.com/)",
+  "contributors": [
+    {
+      "name": "Thomas Roger",
+      "email": "troger@nuxeo.com"
+    }
+  ],
+  "homepage": "https://github.com/nuxeo/nuxeo-js-client",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nuxeo/nuxeo-js-client.git"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "keywords": [
+    "nuxeo"
+  ],
+  "dependencies": {
+    "extend": "~1.2.1",
+    "restler": "~3.1.0"
+  },
+  "devDependencies": {
+    "gulp-util": "~2.2.14",
+    "gulp": "~3.5.2",
+    "gulp-mocha": "~0.4.1",
+    "chai": "~1.9.0",
+    "temp": "~0.6.0"
+  },
+  "licenses" : [{
+    "type": "Apache",
+    "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+  }]
+}

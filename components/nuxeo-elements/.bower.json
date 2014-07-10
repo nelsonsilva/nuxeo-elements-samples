@@ -1,0 +1,24 @@
+{
+  "name": "nuxeo-elements",
+  "authors": [
+    "Nelson Silva <nelson.silva@inevo.pt>"
+  ],
+  "description": "Nuxeo Web Components",
+  "license": "LGPL",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#>=0.3.0 <1.0.0",
+    "core-elements": "Polymer/core-elements#>=0.3.0 <1.0.0",
+    "nuxeo": ">=0.2.0 <1.0.0"
+  },
+  "homepage": "https://github.com/nelsonsilva/nuxeo-elements",
+  "_release": "7685ef626b",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "7685ef626bc0ae820cf72072da91f61fb57ee39d"
+  },
+  "_source": "git://github.com/nelsonsilva/nuxeo-elements.git",
+  "_target": "master",
+  "_originalSource": "nelsonsilva/nuxeo-elements"
+}
