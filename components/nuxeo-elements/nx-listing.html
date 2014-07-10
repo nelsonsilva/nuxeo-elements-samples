@@ -32,7 +32,7 @@ The `nx-listing` provides a listing with pagination control and selection
 The `<template>` content will be used for rendering each item.
 Data is bound to `item`.
 
-@element listing
+@element nx-listing
 @homepage http://www.nuxeo.org
 -->
 
@@ -46,7 +46,7 @@ Data is bound to `item`.
                 display: block;
                 width: 100%;
             }
-            
+
             .pagination span {
                 color: #777;
                 vertical-align: middle;
@@ -59,7 +59,7 @@ Data is bound to `item`.
                 vertical-align: middle;
             }
 
-            .pagination input[disabled] {                
+            .pagination input[disabled] {
                 opacity: .4;
                 cursor: default;
             }
@@ -85,7 +85,7 @@ Data is bound to `item`.
             provider: null,
 
             /**
-            * 
+            *
             * Set to true to support multiple selection.
             *
             * @attribute multiSelect

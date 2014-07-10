@@ -1,0 +1,131 @@
+<!--
+(C) Copyright 2014 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Nelson Silva <nelson.silva@inevo.pt>
+-->
+<html>
+<head>
+    <title>Nuxeo elements samples</title>
+    <meta name="viewport"
+          content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <script src="components/platform/platform.js"></script>
+    <link rel="import" href="components/font-roboto/roboto.html">
+    <link rel="import" href="components/polymer/polymer.html">
+    <link rel="import" href="components/core-animated-pages/core-animated-pages.html">
+    <link rel="import" href="components/core-header-panel/core-header-panel.html">
+    <link rel="import" href="components/core-toolbar/core-toolbar.html">
+    <link rel="import" href="components/paper-tabs/paper-tabs.html">
+    <link rel="import" href="components/nuxeo-elements/nx-connection.html">
+    <link rel="import" href="components/nuxeo-elements/nx-content-view.html">
+    <link rel="import" href="components/nuxeo-elements/nx-document.html">
+    <link rel="import" href="components/nuxeo-elements/nx-layout.html">
+    <link rel="import" href="components/nuxeo-elements/nx-page-provider.html">
+    <link rel="import" href="components/nuxeo-elements/nx-widget.html">
+    <style>
+    body {
+      font-family: 'RobotoDraft', sans-serif;
+      background: #eee;
+    }
+
+    core-header-panel {
+        height: 100%;
+        overflow: auto;
+    }
+
+    core-toolbar {
+        background: #03a9f4;
+        color: white;
+    }
+
+    core-animated-pages {
+        width: 80%;
+        margin: 20px auto;
+      }
+
+    paper-tabs {
+        width: 100%;
+    }
+
+    .container {
+        width: 80%;
+        margin: 50px auto;
+    }
+
+    @media (min-width: 481px) {
+        paper-tabs {
+            width: 200px;
+        }
+
+        .container {
+            width: 400px;
+        }
+    }
+
+    </style>
+</head>
+<body unresolved fullbleed vertical layout>
+
+<nx-connection id="nx_connection" url="http://demo.nuxeo.com/nuxeo"></nx-connection>
+<template is="auto-binding">
+
+<nx-document auto id="doc" docPath="{{currentPath}}" doc="{{currentParent}}"></nx-document>
+
+<core-header-panel>
+  <core-toolbar>
+    <core-icon-button icon="arrow-back" on-tap="{{back}}"></core-icon-button>
+    <span flex>{{currentParent.path}}</span>
+  </core-toolbar>
+
+    <div class="container" layout vertical center>
+
+    <nx-content-view name="document_content" showFilterForm="true" showPageSizeSelector="true" refresh="documentChanged documentChildrenChanged" resultTemplates="title,path,heading" on-document-selected="{{documentSelected}}">
+
+        <!-- tree_children -->
+        <nx-page-provider auto id="provider" pageSize="20" query="select * from Document where ecm:parentId = '{{currentParent.uid}}' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted'" sort="dc:title"></nx-page-provider>
+
+        <template id="title">
+          <div>{{title}}</div>
+        </template>
+
+        <template id="path">
+          <div>{{path}}</div>
+        </template>
+
+        <template id="heading">
+          <nx-layout horizontal ref="heading" value="{{}}"></nx-widget>
+        </template>
+
+    </nx-content-view>
+  </div>
+
+
+</core-header-panel>
+</template>
+<script>
+    var t = document.querySelector('template');
+    t.currentPath = '/';
+    t.fetchRoot = function() {
+      t.$.doc.get();
+    };
+    t.documentSelected = function(e, detail) {
+      this.currentParent = detail.doc;
+      this.currentPath = this.currentParent.path;
+    };
+    t.back = function() {
+      this.currentPath = this.currentPath.substring(0, this.currentPath.lastIndexOf('/') + 1);
+      t.$.doc.get();
+    }
+</script>
+</body>
+</html>
