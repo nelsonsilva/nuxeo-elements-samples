@@ -1,0 +1,25 @@
+{
+  "name": "nuxeo-elements-sample",
+  "version": "0.0.1",
+  "authors": [
+    "Nelson Silva <nelson.silva@inevo.pt>"
+  ],
+  "description": "Nuxeo Web Components Sample",
+  "license": "LGPL",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#>=0.3.0 <1.0.0",
+    "core-elements": "Polymer/core-elements#>=0.3.0 <1.0.0",
+    "core-animated-pages": "Polymer/core-animated-pages#>=0.3.0 <1.0.0",
+    "paper-elements": "Polymer/paper-elements#>=0.3.0 <1.0.0",
+    "nuxeo-elements": "nelsonsilva/nuxeo-elements#master",
+    "sampler-scaffold": "Polymer/sampler-scaffold#>=0.3.0 <1.0.0"
+ }
+}

@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Nuxeo elements samples</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <script src="components/platform/platform.js"></script>
+
+    <link rel="import" href="components/core-icons/core-icons.html">
+    <link rel="import" href="components/sampler-scaffold/sampler-scaffold.html">
+    <link rel="import" href="components/font-roboto/roboto.html">
+    <link rel="import" href="components/core-item/core-item.html">
+    <link rel="import" href="components/core-menu/core-submenu.html">
+
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        background-color: #eee;
+        font-family: 'RobotoDraft', sans-serif;
+      }
+
+
+      sampler-scaffold::shadow [main] core-toolbar {
+         background-color: #203f7d;
+         color: #fff;
+       }
+
+       sampler-scaffold::shadow [drawer] core-toolbar {
+         background: white url(http://0.assets.nuxeo.com/wp-content/themes/nuxeo.com_wp/imgs/logo340x60.png) no-repeat;
+         background-size: 200px;
+         background-position: 10px 30px;
+       }
+
+       sampler-scaffold::shadow #card.move-up {
+         transition: 0.38s -webkit-transform cubic-bezier(0.4, 0.0, 0.2, 1);
+         transition: 0.38s transform cubic-bezier(0.4, 0.0, 0.2, 1);
+       }
+
+       sampler-scaffold::shadow #card {
+         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+         transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+       }
+
+       sampler-scaffold::shadow core-icon-button.action-button {
+         position: absolute;
+         right: 14px;
+         bottom: -28px;
+         width: 56px;
+         height: 56px;
+         border-radius: 28px;
+         padding: 16px;
+         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+         background-color: #fcfcfc !important;
+       }
+
+       sampler-scaffold::shadow .action-button:hover:not(:active) {
+         box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2);
+       }
+    </style>
+</head>
+<body unresolved touch-action="auto">
+  <sampler-scaffold fit touch-action="auto">
+    <core-item label="Widgets" tag="nx-widget" url="nuxeo-widgets.html"></core-item>
+    <core-item label="Layouts" tag="nx-layout" url="nuxeo-layouts.html"></core-item>
+    <core-item label="Listing" tag="nx-listing" url="nuxeo-listings.html"></core-item>
+  </sampler-scaffold>
+  <script>
+    document.querySelector("sampler-scaffold").viewSourceAction = function() {
+      window.open(this.$.frame.contentWindow.location.href, this.item.tag);
+    };
+  </script>
+</body>
+</html>
