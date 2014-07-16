@@ -8,7 +8,7 @@ module.exports = function (grunt) {
                 bsFiles: {
                     src: [
                         "*.html",
-                        "components/nuxeo-elements/*.html"
+                        "components/nuxeo-elements/**/*.html"
                     ]
                 },
                 options: {
