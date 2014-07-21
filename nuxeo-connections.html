@@ -1,0 +1,104 @@
+<!--
+(C) Copyright 2014 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Nelson Silva <nelson.silva@inevo.pt>
+-->
+<html>
+<head>
+    <title>Nuxeo elements samples</title>
+    <meta name="viewport"
+          content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <script src="components/platform/platform.js"></script>
+    <link rel="import" href="components/font-roboto/roboto.html">
+    <link rel="import" href="components/polymer/polymer.html">
+    <link rel="import" href="components/nuxeo-elements/nx-connection.html">
+    <link rel="import" href="components/nuxeo-elements/nx-operation.html">
+</head>
+<style>
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #E5E5E5;
+      font-family: 'RobotoDraft', sans-serif;
+    }
+
+    .container {
+        width: 80%;
+        margin: 50px auto;
+    }
+
+    @media (min-width: 481px) {
+        .container {
+            width: 400px;
+        }
+    }
+
+    .card {
+        display: block;
+        position: relative;
+        background-color: white;
+        padding: 10px;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+</style>
+</head>
+<body>
+<template is="auto-binding">
+  <template repeat="{{server in servers}}">
+    <!-- A connection to the server -->
+    <nx-connection connectionId="{{server.id}}"
+      url="{{server.url}}"
+      username="{{server.username}}"
+      password="{{server.password}}"></nx-connection>
+    <!-- An operation call to the server -->
+    <nx-operation auto connectionId="{{server.id}}"
+      op="Counters.GET"
+      params='{"counterNames":"org.nuxeo.web.sessions"}'
+      response="{{server.counters}}"></nx-operation>
+  </template>
+
+  <div class="container" layout vertical center>
+    <template repeat="{{server in servers}}">
+        <div class="card" layout vertical center>
+            <h2>{{server.id}}</h2>
+            <p>{{server.counters["org.nuxeo.web.sessions"] | lastValue}} active sessions</p>
+            <p style="color:#ccc;font-size:12px">@ {{server.counters["org.nuxeo.web.sessions"] | lastTime}}</p>
+        </div>
+    </template>
+  </div>
+</template>
+<script>
+    var t = document.querySelector('template');
+    t.servers = [
+      {id: "demo", url: "http://demo.nuxeo.com/nuxeo", username: "Administrator", password: "Administrator"},
+      {id: "local", url: "http://localhost:8080/nuxeo", username: "Administrator", password: "Administrator"}
+    ];
+    t.lastValue = function(counter) {
+      if (!counter || !counter.values) return;
+      var l = counter.values.length;
+      return counter.values[l - 1][1];
+    },
+    t.lastTime = function(counter) {
+      if (!counter || !counter.values) return;
+      var l = counter.values.length;
+      return new Date(counter.values[l - 1][0]).toUTCString();
+    }
+</script>
+</body>
+</html>
+
+
