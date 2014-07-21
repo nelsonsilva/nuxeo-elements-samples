@@ -34,7 +34,7 @@ Note: Elements that depend on a connectionId use `nx_connection` as default.
 <link rel="import" href="../polymer/polymer.html">
 <script src="../jquery/dist/jquery.min.js"></script>
 <script src="../nuxeo/lib/jquery/nuxeo.js"></script>
-<polymer-element name="nx-connection" attributes="url username password">
+<polymer-element name="nx-connection" attributes="connectionId url username password">
     <template>
         <style>
             :host {
@@ -43,15 +43,28 @@ Note: Elements that depend on a connectionId use `nx_connection` as default.
         </style>
     </template>
     <script>
+    (function() {
+        // A global map of clients with connectionId as key.
+        // This map is shared between all instances of nx-connection.
+        var nxClients = {};
+
         Polymer('nx-connection', {
+            /**
+             * A unique identifier for this connection.
+             *
+             * @attribute connectionId
+             * @type string
+             * @default 'nx'
+             */
+            connectionId: 'nx',
             /**
              * The base URL of the Nuxeo server.
              *
              * @attribute url
              * @type string
-             * @default 'http://localhost:8080/nuxeo'
+             * @default ''
              */
-            url: 'http://localhost:8080/nuxeo',
+            url: '',
             /**
              * The username.
              *
@@ -69,10 +82,9 @@ Note: Elements that depend on a connectionId use `nx_connection` as default.
              */
             password: 'Administrator',
 
-            connected: false,
-
             observe: {
-                'url username password': 'connect'
+                'url username password': 'connect',
+                'client.connected': 'handleConnected'
             },
 
             ready: function() {
@@ -80,29 +92,46 @@ Note: Elements that depend on a connectionId use `nx_connection` as default.
             },
 
             connect: function() {
-                // Create the client if needed
-                // If we already have a client with the same connection info just keep it
-                if (this.client &&
-                    this.client._baseURL === this.url &&
-                    this.client._username === this.username &&
-                    this.client._password === this.password) {
-                    return;
+
+              // Create the client if needed
+              // If we already have a client with the same connection info just keep it
+              var id = (this.connectionId) ?  this.connectionId : Object.keys(nxClients)[0];
+              this.client = nxClients[id];
+              if (this.client &&
+                  this.client._baseURL === this.url &&
+                  this.client._username === this.username &&
+                  this.client._password === this.password) {
+                  return;
+              }
+
+              if (!this.url) {
+                return;
+              }
+
+              nxClients[id] = this.client = new nuxeo.Client({
+                    baseURL: this.url, username: this.username, password: this.password, schemas: '*'
+              });
+
+              this.client.connect(function(error, client) {
+                if (error) {
+                  this.fire('error', {error: error});
+                  return;
                 }
 
-                this.client = new nuxeo.Client({
-                    baseURL: this.url, username: this.username, password: this.password, schemas: '*'
-                });
-
-                this.client.connect(function(error, client) {
-                  if (error) {
-                    this.fire('error', {error: error});
-                    return;
-                  }
-                  this.connected = client.connected;
-                  this.fire('connected');
-                }.bind(this));
+              }.bind(this));
             },
 
+            get connected() {
+              return this.client && this.client.connected;
+            },
+
+            handleConnected: function() {
+              if (this.client.connected) {
+                this.fire('connected');
+              }
+            }
+
         });
+    })();
     </script>
 </polymer-element>

@@ -31,7 +31,7 @@ Contributors:
     <link rel="import" href="components/nuxeo-elements/nx-document.html">
     <link rel="import" href="components/nuxeo-elements/nx-layout.html">
     <link rel="import" href="components/nuxeo-elements/nx-page-provider.html">
-    <link rel="import" href="components/nuxeo-elements/nx-widget.html">
+    <link rel="import" href="components/nuxeo-elements/nx-widgets.html">
     <style>
     body {
       font-family: 'RobotoDraft', sans-serif;
@@ -89,22 +89,21 @@ Contributors:
 
     <div class="container" layout vertical center>
 
-    <nx-content-view name="document_content" showFilterForm="true" showPageSizeSelector="true" refresh="documentChanged documentChildrenChanged" resultTemplates="title,path,heading" on-document-selected="{{documentSelected}}">
+    <nx-content-view name="document_content" showPageSizeSelector="true" on-document-selected="{{documentSelected}}">
 
-        <!-- tree_children -->
-        <nx-page-provider auto id="provider" pageSize="20" query="select * from Document where ecm:parentId = '{{currentParent.uid}}' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted'" sort="dc:title"></nx-page-provider>
+        <nx-page-provider auto ref="tree_children" params="{{currentParent.uid}}"></nx-page-provider>
 
-        <template id="title">
-          <div>{{title}}</div>
-        </template>
+        <nx-layout class="results" name="title" icon="/icons/document_listing_icon.png">
+          <template>
+            <column><nx-text value="{{value.title}}"></nx-text></column>
+          </template>
+        </nx-layout>
 
-        <template id="path">
-          <div>{{path}}</div>
-        </template>
+        <!--nx-layout horizontal id="path" icon="/icons/document_listing_icon.png">
+          {{path}}
+        </nx-layout-->
 
-        <template id="heading">
-          <nx-layout horizontal ref="heading" value="{{}}"></nx-widget>
-        </template>
+        <nx-layout class="results" name="heading" ref="heading" icon="/icons/document_listing_icon.png"></nx-layout>
 
     </nx-content-view>
   </div>
@@ -119,7 +118,7 @@ Contributors:
       t.$.doc.get();
     };
     t.documentSelected = function(e, detail) {
-      this.currentParent = detail.doc;
+      this.currentParent = detail.value;
       this.currentPath = this.currentParent.path;
     };
     t.back = function() {

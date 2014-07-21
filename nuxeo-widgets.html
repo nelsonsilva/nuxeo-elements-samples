@@ -24,7 +24,7 @@ Contributors:
     <link rel="import" href="components/polymer/polymer.html">
     <link rel="import" href="components/core-toolbar/core-toolbar.html">
     <link rel="import" href="components/nuxeo-elements/nx-connection.html">
-    <link rel="import" href="components/nuxeo-elements/nx-widget.html">
+    <link rel="import" href="components/nuxeo-elements/nx-widgets.html">
     <style>
 
       body {
@@ -74,48 +74,48 @@ Contributors:
     <tbody>
     <tr>
       <td>Text</td>
-      <td><nx-widget type="text" mode="view" value="{{textValue}}"></nx-widget></td>
-      <td><nx-widget type="text" mode="edit" value="{{textValue}}"></nx-widget></td>
+      <td><nx-text value="{{textValue}}"></nx-text></td>
+      <td><nx-text mode="edit" value="{{textValue}}"></nx-text></td>
     </tr>
     <tr>
       <td>Textarea</td>
-      <td><nx-widget type="textarea" mode="view" value="{{textareaValue}}"></nx-widget></td>
-      <td><nx-widget type="textarea" mode="edit" value="{{textareaValue}}"></nx-widget></td>
+      <td><nx-textarea value="{{textareaValue}}"></nx-textarea></td>
+      <td><nx-textarea mode="edit" value="{{textareaValue}}"></nx-textarea></td>
     </tr>
     <tr>
       <td>Datetime</td>
-      <td><nx-widget type="datetime" mode="view" value="{{datetimeValue}}"></nx-widget></td>
-      <td><nx-widget type="datetime" mode="edit" value="{{datetimeValue}}"></nx-widget></td>
+      <td><nx-datetime value="{{datetimeValue}}"></nx-datetime></td>
+      <td><nx-datetime mode="edit" value="{{datetimeValue}}"></nx-datetime></td>
     </tr>
     <tr>
-      <td>Int</td>
-      <td><nx-widget type="int" mode="view" value="{{intValue}}"></nx-widget></td>
-      <td><nx-widget type="int" mode="edit" value="{{intValue}}"></nx-widget></td>
+      <td>Integer</td>
+      <td><nx-integer value="{{intValue}}"></nx-integer></td>
+      <td><nx-integer mode="edit" value="{{intValue}}"></nx-integer></td>
     </tr>
     <tr>
       <td>Checkbox</td>
-      <td><nx-widget type="checkbox" mode="view" value="{{boolValue}}"></nx-widget></td>
-      <td><nx-widget type="checkbox" mode="edit" value="{{boolValue}}"></nx-widget></td>
+      <td><nx-checkbox value="{{boolValue}}"></nx-checkbox></td>
+      <td><nx-checkbox mode="edit" value="{{boolValue}}"></nx-checkbox></td>
     </tr>
     <tr>
       <td>Richtext</td>
-      <td><nx-widget type="richtext_with_mimetype" mode="view" value="{{richTextValue}}"></nx-widget></td>
-      <td><nx-widget type="richtext_with_mimetype" mode="edit" value="{{richTextValue}}"></nx-widget></td>
+      <td><nx-richtext value="{{richTextValue}}"></nx-richtext></td>
+      <td><nx-richtext mode="edit" value="{{richTextValue}}"></nx-richtext></td>
     </tr>
     <tr>
-      <td>One Directory</td>
-      <td><nx-widget type="suggestOneDirectory" mode="view" value="{{oneDirectoryValue}}"></nx-widget></td>
-      <td><nx-widget type="suggestOneDirectory" mode="edit" value="{{oneDirectoryValue}}"></nx-widget></td>
+      <td>Single Directory</td>
+      <td><nx-directory directoryName="subject" value="{{oneDirectoryValue}}"></nx-directory></td>
+      <td><nx-directory directoryName="subject" mode="edit" value="{{oneDirectoryValue}}"></nx-directory></td>
     </tr>
     <tr>
       <td>Many Directory</td>
-      <td><nx-widget type="suggestManyDirectory" mode="view" value="{{manyDirectoryValue}}"></nx-widget></td>
-      <td><nx-widget type="suggestManyDirectory" mode="edit" value="{{manyDirectoryValue}}"></nx-widget></td>
+      <td><nx-directory multiple directoryName="subject" value="{{manyDirectoryValue}}"></nx-directory></td>
+      <td><nx-directory multiple directoryName="subject" mode="edit" value="{{manyDirectoryValue}}"></nx-directory></td>
     </tr>
     <tr>
-      <td>Template</td>
-      <td><nx-widget type="template" mode="view" value="{{templateValue}}"></nx-widget></td>
-      <td><nx-widget type="template" mode="edit" value="{{templateValue}}"></nx-widget></td>
+      <td>Single Directory (dbl10n) </td>
+      <td><nx-directory directoryName="l10nsubjects" value="{{oneDirectoryValue2}}"></nx-directory></td>
+      <td><nx-directory directoryName="l10nsubjects" dbl10n="true" mode="edit" value="{{oneDirectoryValue2}}"></nx-directory></td>
     </tr>
     </tbody>
     </table>
