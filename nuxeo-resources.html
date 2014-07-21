@@ -87,7 +87,7 @@
 </head>
 <body unresolved>
 
-<nx-connection id="nx_connection" url="http://demo.nuxeo.com/nuxeo"></nx-connection>
+<nx-connection url="http://demo.nuxeo.com/nuxeo"></nx-connection>
 
 <template is="auto-binding">
   <flatiron-director route="{{resourcePath}}"></flatiron-director>
@@ -97,14 +97,6 @@
       <core-menu>
         <core-item icon="account-box" label="Users"><a href="#/user"></a></core-item>
         <core-item icon="account-circle" label="Groups"><a href="#/group"></a></core-item>
-        <!--core-submenu icon="settings" label="Vocabularies">
-          <core-item label="Country" href="#/directory/country"></core-item>
-          <core-item label="Industry" href="#/directory/Industry"></core-item>
-          <core-item label="Coverage" href="#/directory/l10ncoverage"></core-item>
-          <core-item label="Subject" href="#/directory/l10nsubjects"></core-item>
-          <core-item label="Language" href="#/directory/language"></core-item>
-          <core-item label="Nature" href="#/directory/nature"></core-item>
-        </core-submenu-->
       </core-menu>
     </core-header-panel>
     <div tool>{{resourcePath}}</div>
@@ -118,7 +110,7 @@
 
       <nx-resource auto id="search" path="{{resourcePath}}/search" params='{"q": "{{filter}}"}'></nx-resource>
 
-      <nx-resource id="resource" path="{{ resourcePath}}/{{$.resource.type == 'user' ? $.resource.data.id : $.resource.data.groupname}}"></nx-resource>
+      <nx-resource id="resource" path="{{resourcePath}}/{{$.resource.type == 'user' ? $.resource.data.id : $.resource.data.groupname}}"></nx-resource>
 
       <core-list id="list" data="{{$.search.data.entries}}" on-core-activate="{{edit}}">
         <template>

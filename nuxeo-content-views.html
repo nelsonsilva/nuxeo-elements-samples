@@ -72,6 +72,11 @@ Contributors:
         }
     }
 
+    nx-content-view /deep/ .results {
+      cursor: pointer;
+      margin: 10px;
+    }
+
     </style>
 </head>
 <body unresolved fullbleed vertical layout>
@@ -93,17 +98,19 @@ Contributors:
 
         <nx-page-provider auto ref="tree_children" params="{{currentParent.uid}}"></nx-page-provider>
 
-        <nx-layout class="results" name="title" icon="/icons/document_listing_icon.png">
+        <nx-layout class="results" name="title" icon="view-headline">
           <template>
             <column><nx-text value="{{value.title}}"></nx-text></column>
           </template>
         </nx-layout>
 
-        <!--nx-layout horizontal id="path" icon="/icons/document_listing_icon.png">
-          {{path}}
-        </nx-layout-->
+        <nx-layout class="results" name="path" icon="folder">
+          <template>
+            <column>{{value.path}}</column>
+          </template>
+        </nx-layout>
 
-        <nx-layout class="results" name="heading" ref="heading" icon="/icons/document_listing_icon.png"></nx-layout>
+        <nx-layout class="results" name="heading" ref="heading" icon="view-list"></nx-layout>
 
     </nx-content-view>
   </div>

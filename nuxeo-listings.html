@@ -91,7 +91,6 @@ Contributors:
 </style>
 </head>
 <body>
-<nx-connection id="nx_connection" url="http://demo.nuxeo.com/nuxeo"></nx-connection>
 <template is="auto-binding">
 <core-header-panel>
     <core-toolbar>
@@ -102,11 +101,12 @@ Contributors:
     </core-toolbar>
 
     <div class="container" layout vertical center>
+        <nx-connection id="nx" url="http://demo.nuxeo.com/nuxeo"></nx-connection>
         <nx-listing>
             <nx-page-provider auto pageSize="5" query="select * from {{selectedDoctype}} where ecm:currentLifeCycleState != 'deleted'"></nx-page-provider>
             <template>
                 <div class="card" layout horizontal center>
-                    <img src="{{connection.url}}/nxthumb/default/{{item.uid}}/blobholder:0/" >
+                    <img src="{{$.nx.url}}/nxthumb/default/{{item.uid}}/blobholder:0/" >
                     <h2>{{item.title}}</h2>
                 </div>
             </template>
@@ -117,7 +117,6 @@ Contributors:
 <script>
     var t = document.querySelector('template');
     t.selectedDoctype = 'Picture';
-    t.connection = document.querySelector('#nx_connection');
 </script>
 </body>
 </html>
