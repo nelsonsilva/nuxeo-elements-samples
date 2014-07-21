@@ -12,11 +12,11 @@
     "nuxeo": ">=0.2.0 <1.0.0"
   },
   "homepage": "https://github.com/nelsonsilva/nuxeo-elements",
-  "_release": "24f211dfde",
+  "_release": "cd2b4ae45d",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "24f211dfde25106f3478c31fff310cadbe2db3d7"
+    "commit": "cd2b4ae45d8918b80d551e4e3dacec886846a9e7"
   },
   "_source": "git://github.com/nelsonsilva/nuxeo-elements.git",
   "_target": "master",
