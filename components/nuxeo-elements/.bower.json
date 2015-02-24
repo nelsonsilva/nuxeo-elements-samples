@@ -7,18 +7,19 @@
   "license": "LGPL",
   "private": true,
   "dependencies": {
-    "polymer": "Polymer/polymer#>=0.5.1 <1.0.0",
-    "core-elements": "Polymer/core-elements#>=0.5.1 <1.0.0",
-    "nuxeo": ">=0.2.0 <1.0.0"
+    "polymer": "Polymer/polymer#^0.5.1",
+    "core-elements": "Polymer/core-elements#^0.5.1",
+    "nuxeo": "^0.2.0",
+    "es6-promise": "^2.0.0"
   },
-  "homepage": "https://github.com/nelsonsilva/nuxeo-elements",
-  "_release": "5f30bd9d69",
+  "homepage": "https://github.com/nuxeo/nuxeo-elements",
+  "_release": "c96899e253",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "5f30bd9d696fd3f83777fd5add7a135674278c8c"
+    "commit": "c96899e2533d77ea3ea8bb237b1352ebe13e942f"
   },
-  "_source": "git://github.com/nelsonsilva/nuxeo-elements.git",
+  "_source": "git://github.com/nuxeo/nuxeo-elements.git",
   "_target": "master",
-  "_originalSource": "nelsonsilva/nuxeo-elements"
+  "_originalSource": "nuxeo/nuxeo-elements"
 }

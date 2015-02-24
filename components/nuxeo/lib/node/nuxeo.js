@@ -179,15 +179,6 @@ Client.prototype.document = function(data) {
   });
 };
 
-Client.prototype.uploader = function(options) {
-  options = extend(true, {}, options, {
-    service: this._automationService,
-    timeout: this._timeout,
-    repositoryName: this._repositoryName,
-    headers: this._headers
-  })
-  return new Uploader(options);
-};
 
 var Operation = function(options) {
   this._id = options.id;
@@ -690,7 +681,7 @@ var Uploader = function(options) {
   this._numConcurrentUploads = options.numConcurrentUploads;
   this._directUpload = options.directUpload;
   this._uploadRateRefreshTime = options.uploadRateRefreshTime;
-  this._batchStartedCallback = options.batchStartedCallback;
+  this._batchStartedCallback = options.batchFinishedCallback;
   this._batchFinishedCallback = options.batchFinishedCallback;
   this._uploadStartedCallback = options.uploadStartedCallback;
   this._uploadFinishedCallback = options.uploadFinishedCallback;
@@ -809,9 +800,9 @@ Uploader.prototype.uploadFiles = function() {
             file.callback(file.fileIndex, file,
               timeDiff);
           }
-          self._nbUploadInProgress--;
+          self._nbUploadInprogress--;
           if (!self._sendingRequestsInProgress && self._uploadStack.length > 0
-            && self._nbUploadInProgress < self._numConcurrentUploads) {
+            && self._nbUploadInprogress < self._numConcurrentUploads) {
             // restart upload
             log('restart pending uploads');
             self.uploadFiles();
