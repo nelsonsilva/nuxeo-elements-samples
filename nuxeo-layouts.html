@@ -95,7 +95,7 @@ Contributors:
 
 <template is="auto-binding">
 
-  <nx-connection url="http://demo.nuxeo.com/nuxeo"></nx-connection>
+  <nx-connection url="http://localhost:8080/nuxeo"></nx-connection>
   <nx-page-provider id="docs" auto pageSize="5" query="select * from Note where ecm:currentLifeCycleState != 'deleted'" currentPage="{{docs}}"></nx-page-provider>
 
   <core-toolbar>
