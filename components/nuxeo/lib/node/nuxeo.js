@@ -1,5 +1,9 @@
-var extend = require('extend'),
-  rest = require('restler');
+var crypto = require('crypto'),
+  extend = require('extend'),
+  rest = require('restler'),
+  Random = require("random-js");
+
+var random = Random.engines.mt19937().autoSeed();
 
 if (typeof(log) === 'undefined') {
   log = function() {};
@@ -7,8 +11,8 @@ if (typeof(log) === 'undefined') {
 
 function join() {
   var args = Array.prototype.slice.call(arguments);
-  for(var i = args.length - 1; i >= 0; i--) {
-    if(args[i] === null || args[i] === undefined || (typeof args[i] == 'string'  && args[i].length === 0)) {
+  for (var i = args.length - 1; i >= 0; i--) {
+    if (args[i] === null || args[i] === undefined || (typeof args[i] == 'string' && args[i].length === 0)) {
       args.splice(i, 1);
     }
   }
@@ -25,9 +29,27 @@ var DEFAULT_CLIENT_OPTIONS = {
   baseURL: 'http://localhost:8080/nuxeo/',
   restPath: 'site/api/v1/',
   automationPath: 'site/automation/',
-  username: 'Administrator',
-  password: 'Administrator',
-  timeout: 3000
+  auth: {
+    method: 'basic',
+    username: 'Administrator',
+    password: 'Administrator'
+  },
+  timeout: 30000
+};
+
+var auth = {
+  proxy: {
+    DEFAULT_HEADER_NAME: 'Auth-User'
+  },
+  portal: {
+    TOKEN_SEPARATOR: ':',
+    headerNames: {
+      RANDOM: 'NX_RD',
+      TIMESTAMP: 'NX_TS',
+      TOKEN: 'NX_TOKEN',
+      USER: 'NX_USER'
+    }
+  }
 };
 
 var Client = function(options) {
@@ -35,63 +57,100 @@ var Client = function(options) {
   this._baseURL = options.baseURL;
   this._restURL = join(this._baseURL, options.restPath, '/');
   this._automationURL = join(this._baseURL, options.automationPath, '/');
-  this._username = options.username;
-  this._password = options.password;
+  this._auth = options.auth;
   this._repositoryName = options.repositoryName || 'default';
   this._schemas = options.schemas || [];
   this._headers = options.headers || {};
   this._timeout = options.timeout;
   this.connected = false;
 
+  this._initAuthentication();
+
   var self = this;
+
   var RestService = rest.service(function() {
-    this.defaults.username = self._username;
-    this.defaults.password = self._password;
+    if (self._auth.method === 'basic') {
+      this.defaults.username = self._auth.username;
+      this.defaults.password = self._auth.password;
+    }
   }, {
     baseURL: self._restURL
   });
   this._restService = new RestService();
 
   var AutomationService = rest.service(function() {
-    this.defaults.username = self._username;
-    this.defaults.password = self._password;
+    if (self._auth.method === 'basic') {
+      this.defaults.username = self._auth.username;
+      this.defaults.password = self._auth.password;
+    }
   }, {
     baseURL: self._automationURL
   });
   this._automationService = new AutomationService();
 };
 
+Client.prototype._initAuthentication = function() {
+  switch (this._auth.method) {
+    case 'proxy':
+      var proxyAuthHeaderName = this._auth.proxyAuthHeaderName || auth.proxy.DEFAULT_HEADER_NAME;
+      this._headers[proxyAuthHeaderName] = this._auth.username;
+      break;
+
+    case 'portal':
+      var date = new Date();
+      var randomData = random();
+
+      var clearToken = date.getTime() + auth.portal.TOKEN_SEPARATOR
+        + randomData + auth.portal.TOKEN_SEPARATOR
+        + this._auth.secret + auth.portal.TOKEN_SEPARATOR
+        + this._auth.username;
+
+      var base64hashedToken = crypto.createHash('md5')
+        .update(clearToken, 'utf8').digest('base64');
+      this._headers[auth.portal.headerNames.RANDOM] = randomData;
+      this._headers[auth.portal.headerNames.TIMESTAMP] = date.getTime();
+      this._headers[auth.portal.headerNames.TOKEN] = base64hashedToken;
+      this._headers[auth.portal.headerNames.USER] = this._auth.username;
+      break;
+  }
+};
+
 Client.prototype.connect = function(callback) {
   var self = this;
-  rest.post(join(this._automationURL, 'login'), {
-    username: this._username,
-    password: this._password,
-    headers: {
-      'Accept': 'application/json'
-    }
-  }).on('complete', function(data) {
-    if (data instanceof Error) {
-      callback(data, self)
-    } else {
-      try {
-        if (data['entity-type'] === 'login' && data['username'] === self._username) {
-          self.connected = true;
-          if (callback) {
-            callback(null, self)
+  var options = {};
+  var headers = extend(true, {}, this._headers);
+  headers['Accept'] = 'application/json';
+  options.headers = headers;
+
+  if (this._auth.method === 'basic') {
+    options.username = this._auth.username;
+    options.password = this._auth.password;
+  }
+
+  rest.post(join(this._automationURL, 'login'), options)
+    .on('complete', function(data) {
+      if (data instanceof Error) {
+        callback(data, self)
+      } else {
+        try {
+          if (data['entity-type'] === 'login' && data['username'] === self._auth.username) {
+            self.connected = true;
+            if (callback) {
+              callback(null, self)
+            }
+          } else {
+            if (callback) {
+              callback(data, self);
+            }
           }
-        } else {
+        } catch (e) {
+          console.log(e);
           if (callback) {
             callback(data, self);
           }
         }
-      } catch (e) {
-        console.log(e);
-        if (callback) {
-          callback(data, self);
-        }
       }
-    }
-  });
+    });
 };
 
 Client.prototype.header = function(name, value) {
@@ -125,29 +184,34 @@ Client.prototype.schemas = function(schemas) {
 };
 
 Client.prototype.fetchOperationDefinitions = function(callback) {
-  rest.get(this._automationURL, {
-    username: this._username,
-    password: this._password,
-    headers: {
-      'Accept': 'application/json'
-    }
-  }).on('complete', function(data, response) {
-    if (data instanceof Error) {
-      console.log(data);
-      if (callback) {
-        callback(data, null, response);
-      }
-      return;
-    }
+  var options = {};
+  var headers = extend(true, {}, this._headers);
+  headers['Accept'] = 'application/json';
+  options.headers = headers;
 
-    if (callback) {
-      callback(null, data, response);
-    }
-  });
+  if (this._auth.method === 'basic') {
+    options.username = this._auth.username;
+    options.password = this._auth.password;
+  }
+
+  rest.get(this._automationURL, options)
+    .on('complete', function(data, response) {
+      if (data instanceof Error) {
+        console.log(data);
+        if (callback) {
+          callback(data, null, response);
+        }
+        return;
+      }
+
+      if (callback) {
+        callback(null, data, response);
+      }
+    });
 };
 
-Client.prototype.operation =function(id) {
-  return new Operation( {
+Client.prototype.operation = function(id) {
+  return new Operation({
     service: this._automationService,
     id: id,
     timeout: this._timeout,
@@ -179,6 +243,15 @@ Client.prototype.document = function(data) {
   });
 };
 
+Client.prototype.uploader = function(options) {
+  options = extend(true, {}, options, {
+    service: this._automationService,
+    timeout: this._timeout,
+    repositoryName: this._repositoryName,
+    headers: this._headers
+  })
+  return new Uploader(options);
+};
 
 var Operation = function(options) {
   this._id = options.id;
@@ -251,6 +324,7 @@ Operation.prototype.execute = function(options, callback) {
     options = {};
   }
   options = options || {};
+  options.timeout = this._timeout;
   options.method = 'post';
   options.parser = rest.parsers.auto;
 
@@ -269,8 +343,8 @@ Operation.prototype.execute = function(options, callback) {
   if (typeof this._automationParams.input === 'object') {
     // multipart
     var automationParams = {
-      params : this._automationParams.params,
-      context : this._automationParams.context
+      params: this._automationParams.params,
+      context: this._automationParams.context
     };
     options.multipart = true;
     options.data = {
@@ -387,7 +461,9 @@ Request.prototype.post = function(options, callback) {
     callback = options;
     options = {};
   }
-  this.headers({ 'Content-Type': 'application/json' });
+  this.headers({
+    'Content-Type': 'application/json'
+  });
   if (options.data && typeof options.data !== 'string') {
     options.data = JSON.stringify(options.data);
   }
@@ -403,7 +479,9 @@ Request.prototype.put = function(options, callback) {
     callback = options;
     options = {};
   }
-  this.headers({ 'Content-Type': 'application/json' });
+  this.headers({
+    'Content-Type': 'application/json'
+  });
   if (options.data && typeof options.data !== 'string') {
     options.data = JSON.stringify(options.data);
   }
@@ -419,6 +497,9 @@ Request.prototype.delete = function(options, callback) {
     callback = options;
     options = {};
   }
+  this.headers({
+    'Content-Type': 'application/json'
+  });
   options = extend(true, options, {
     method: 'delete'
   });
@@ -432,6 +513,7 @@ Request.prototype.execute = function(options, callback) {
     options = {};
   }
   options = options || {};
+  options.timeout = this._timeout;
   options.method = options.method || 'get';
   options.parser = rest.parsers.auto;
 
@@ -463,9 +545,6 @@ Request.prototype.execute = function(options, callback) {
 
   var request = this._service.request(path, options);
   request.on('complete', function(data, response) {
-    // for (var n in response) {
-    //   console.log(n)
-    // }
     if (data instanceof Error) {
       if (callback) {
         callback(data, null, response)
@@ -561,8 +640,7 @@ Document.prototype.fetch = function(callback) {
   var request = this._client.request(path);
   request.timeout(this._timeout).schemas(this._schemas).headers(this._headers).repositoryName(this.repository);
   request.get(function(error, data, response) {
-    if (data && typeof data === 'object'
-      && data['entity-type'] === 'document') {
+    if (data && typeof data === 'object' && data['entity-type'] === 'document') {
       data = self._client.document(data);
     }
     if (callback) {
@@ -579,9 +657,42 @@ Document.prototype.create = function(data, callback) {
   }
   var request = this._client.request(path);
   request.timeout(this._timeout).schemas(this._schemas).headers(this._headers).repositoryName(this.repository);
-  request.post({ data: data }, function(error, data, response) {
-    if (data && typeof data === 'object'
-      && data['entity-type'] === 'document') {
+  request.post({
+    data: data
+  }, function(error, data, response) {
+    if (data && typeof data === 'object' && data['entity-type'] === 'document') {
+      data = self._client.document(data);
+    }
+    if (callback) {
+      callback(error, data, response);
+    }
+  });
+};
+
+Document.prototype.copy = function(data, callback) {
+  var self = this;
+  var operation = this._client.operation('Document.Copy');
+  operation.timeout(this._timeout).schemas(this._schemas).headers(this._headers)
+    .repositoryName(this.repository)
+    .input(this.uid).params(data);
+  operation.execute(function(error, data, response) {
+    if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
+      data = self._client.document(data);
+    }
+    if (callback) {
+      callback(error, data, response);
+    }
+  });
+};
+
+Document.prototype.move = function(data, callback) {
+  var self = this;
+  var operation = this._client.operation('Document.Move');
+  operation.timeout(this._timeout).schemas(this._schemas).headers(this._headers)
+    .repositoryName(this.repository)
+    .input(this.uid).params(data);
+  operation.execute(function(error, data, response) {
+    if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
       data = self._client.document(data);
     }
     if (callback) {
@@ -598,9 +709,10 @@ Document.prototype.update = function(data, callback) {
   }
   var request = this._client.request(path);
   request.timeout(this._timeout).schemas(this._schemas).headers(this._headers).repositoryName(this.repository);
-  request.put({ data: data }, function(error, data, response) {
-    if (data && typeof data === 'object'
-      && data['entity-type'] === 'document') {
+  request.put({
+    data: data
+  }, function(error, data, response) {
+    if (data && typeof data === 'object' && data['entity-type'] === 'document') {
       data = self._client.document(data);
     }
     if (callback) {
@@ -615,8 +727,7 @@ Document.prototype.delete = function(callback) {
   var request = this._client.request(path);
   request.timeout(this._timeout).schemas(this._schemas).headers(this._headers).repositoryName(this.repository);
   request.delete(function(error, data, response) {
-    if (data && typeof data === 'object'
-      && data['entity-type'] === 'document') {
+    if (data && typeof data === 'object' && data['entity-type'] === 'document') {
       data = self._client.document(data);
     }
     if (callback) {
@@ -639,8 +750,7 @@ Document.prototype.children = function(callback) {
   var request = this._client.request(path);
   request.timeout(this._timeout).schemas(this._schemas).headers(this._headers).repositoryName(this.repository);
   request.get(function(error, data, response) {
-    if (data !== undefined && typeof data === 'object'
-      && data['entity-type'] === 'document') {
+    if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
       data = self._client.document(data);
     }
     if (callback) {
@@ -654,23 +764,17 @@ var DEFAULT_UPLOADER_OPTIONS = {
   // define if upload should be triggered directly
   directUpload: true,
   // update upload speed every second
-  uploadRateRefreshTime : 1000,
-  batchStartedCallback: function(batchId) {
-  },
-  batchFinishedCallback: function(batchId) {
-  },
-  uploadStartedCallback: function(fileIndex, file) {
-  },
-  uploadFinishedCallback: function(fileIndex, file, time) {
-  }
+  uploadRateRefreshTime: 1000,
+  batchStartedCallback: function(batchId) {},
+  batchFinishedCallback: function(batchId) {},
+  uploadStartedCallback: function(fileIndex, file) {},
+  uploadFinishedCallback: function(fileIndex, file, time) {}
 };
 
 
 var Uploader = function(options) {
   options = extend(true, {}, DEFAULT_UPLOADER_OPTIONS, options || {});
   this._service = options.service;
-  this._username = options.username;
-  this._password = options.password;
   this._operationId = options.operationId;
   this._automationParams = {
     params: {},
@@ -681,7 +785,7 @@ var Uploader = function(options) {
   this._numConcurrentUploads = options.numConcurrentUploads;
   this._directUpload = options.directUpload;
   this._uploadRateRefreshTime = options.uploadRateRefreshTime;
-  this._batchStartedCallback = options.batchFinishedCallback;
+  this._batchStartedCallback = options.batchStartedCallback;
   this._batchFinishedCallback = options.batchFinishedCallback;
   this._uploadStartedCallback = options.uploadStartedCallback;
   this._uploadFinishedCallback = options.uploadFinishedCallback;
@@ -696,8 +800,7 @@ var Uploader = function(options) {
   this._nbUploadInProgress = 0;
   this._completedUploads = [];
 
-  this.batchId = 'batch-' + new Date().getTime() + '-'
-    + Math.floor(Math.random() * 100000);
+  this.batchId = 'batch-' + new Date().getTime() + '-' + Math.floor(Math.random() * 100000);
   this._automationParams.params['operationId'] = this._operationId;
   this._automationParams.params['batchId'] = this.batchId;
 };
@@ -736,9 +839,7 @@ Uploader.prototype.uploadFiles = function() {
   var self = this;
   if (this._nbUploadInProgress >= this._numConcurrentUploads) {
     this._sendingRequestsInProgress = false;
-    log('delaying upload for next file(s) ' + this._uploadIndex
-      + '+ since there are already ' + this._nbUploadInProgress
-      + ' active uploads');
+    log('delaying upload for next file(s) ' + this._uploadIndex + '+ since there are already ' + this._nbUploadInProgress + ' active uploads');
     return;
   }
 
@@ -751,6 +852,7 @@ Uploader.prototype.uploadFiles = function() {
     file.downloadStartTime = new Date().getTime();
 
     var options = {};
+    options.timeout = this._timeout;
     options.method = 'post';
     options.parser = rest.parsers.auto;
 
@@ -779,16 +881,13 @@ Uploader.prototype.uploadFiles = function() {
     request.on('complete', function(data, response) {
       if (data instanceof Error) {
         log('Upload failed, status: ' + data);
-//        if (callback) {
-//          callback(data, null, response)
-//        }
       } else {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           log('Received loaded event on  file ' + file.fileIndex);
           if (self._completedUploads.indexOf(file.fileIndex) < 0) {
             self._completedUploads.push(file.fileIndex);
           } else {
-            log('Event already processed for file ' + file.fileIndex+ ', exiting');
+            log('Event already processed for file ' + file.fileIndex + ', exiting');
             return;
           }
           var now = new Date().getTime();
@@ -800,23 +899,16 @@ Uploader.prototype.uploadFiles = function() {
             file.callback(file.fileIndex, file,
               timeDiff);
           }
-          self._nbUploadInprogress--;
-          if (!self._sendingRequestsInProgress && self._uploadStack.length > 0
-            && self._nbUploadInprogress < self._numConcurrentUploads) {
+          self._nbUploadInProgress--;
+          if (!self._sendingRequestsInProgress && self._uploadStack.length > 0 && self._nbUploadInProgress < self._numConcurrentUploads) {
             // restart upload
             log('restart pending uploads');
             self.uploadFiles();
           } else if (self._nbUploadInProgress == 0) {
             self._batchFinishedCallback(self.batchId);
           }
-//          if (callback) {
-//            callback(null, data, response)
-//          }
         } else {
           log('Upload failed, status: ' + data);
-//          if (callback) {
-//            callback(data, null, response)
-//          }
         }
       }
     });
@@ -827,9 +919,7 @@ Uploader.prototype.uploadFiles = function() {
 
     if (this._nbUploadInProgress >= this._numConcurrentUploads) {
       this._sendingRequestsInProgress = false;
-      log('delaying upload for next file(s) ' + this._uploadIndex
-        + '+ since there are already '
-        + this._nbUploadInProgress + ' active uploads');
+      log('delaying upload for next file(s) ' + this._uploadIndex + '+ since there are already ' + this._nbUploadInProgress + ' active uploads');
       return;
     }
   }
@@ -843,6 +933,7 @@ Uploader.prototype.execute = function(options, callback) {
     options = {};
   }
   options = options || {};
+  options.timeout = this._timeout;
   options.method = 'post';
   options.parser = rest.parsers.auto;
 

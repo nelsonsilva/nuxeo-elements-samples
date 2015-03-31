@@ -6,8 +6,8 @@ var nuxeo = (function(nuxeo) {
 
   function join() {
     var args = Array.prototype.slice.call(arguments);
-    for(var i = args.length - 1; i >= 0; i--) {
-      if(args[i] === null || args[i] === undefined || (typeof args[i] == 'string'  && args[i].length === 0)) {
+    for (var i = args.length - 1; i >= 0; i--) {
+      if (args[i] === null || args[i] === undefined || (typeof args[i] == 'string' && args[i].length === 0)) {
         args.splice(i, 1);
       }
     }
@@ -19,9 +19,12 @@ var nuxeo = (function(nuxeo) {
     baseURL: '/nuxeo',
     restPath: 'site/api/v1',
     automationPath: 'site/automation',
-    username: null,
-    password: null,
-    timeout: 3000
+    auth: {
+      method: 'basic',
+      username: null,
+      password: null
+    },
+    timeout: 30000
   };
 
   var Client = function(options) {
@@ -29,13 +32,28 @@ var nuxeo = (function(nuxeo) {
     this._baseURL = options.baseURL;
     this._restURL = join(this._baseURL, options.restPath);
     this._automationURL = join(this._baseURL, options.automationPath);
-    this._username = options.username;
-    this._password = options.password;
+    this._auth = options.auth;
     this._repositoryName = options.repositoryName || 'default';
     this._schemas = options.schemas || [];
     this._headers = options.headers || {};
     this._timeout = options.timeout;
     this.connected = false;
+
+    this._xhrFields = {};
+    this._initAuthentication();
+  };
+
+  Client.prototype._initAuthentication = function() {
+    switch (this._auth.method) {
+      case 'basic':
+        if (this._auth.username && this._auth.password) {
+          this._headers['Authorization'] = 'Basic ' + btoa(this._auth.username + ':' + this._auth.password);
+          this._xhrFields = {
+            withCredentials: true
+          }
+        }
+        break;
+    }
   };
 
   Client.prototype.connect = function(callback) {
@@ -44,22 +62,16 @@ var nuxeo = (function(nuxeo) {
     var headers = {
       'Accept': 'application/json'
     };
-    var xhrFields = {};
-    if (this._username && this._password) {
-      headers['Authorization'] = 'Basic ' + btoa(this._username + ':' + this._password);
-      xhrFields = {
-        withCredentials: true
-      }
-    }
 
     jQuery.ajax({
-      type: 'POST',
-      url: join(this._automationURL, 'login'),
-      headers: headers,
-      xhrFields: xhrFields
-    })
+        type: 'POST',
+        url: join(this._automationURL, 'login'),
+        headers: headers,
+        xhrFields: this._xhrFields
+      })
       .done(function(data, textStatus, jqXHR) {
-        if (data['entity-type'] === 'login' && data['username'] === self._username) {
+        if (data['entity-type'] === 'login'
+          && (!self._auth.username || data['username'] === self._auth.username)) {
           self.connected = true;
           if (callback) {
             callback(null, self)
@@ -110,26 +122,19 @@ var nuxeo = (function(nuxeo) {
     var headers = {
       'Accept': 'application/json'
     };
-    var xhrFields = {};
-    if (this._username && this._password) {
-      headers['Authorization'] = 'Basic ' + btoa(this._username + ':' + this._password);
-      xhrFields = {
-        withCredentials: true
-      }
-    }
 
     jQuery.ajax({
-      type: 'GET',
-      url: this._automationURL,
-      headers: headers,
-      xhrFields: xhrFields
-    })
-      .done(function (data, textStatus, jqXHR) {
+        type: 'GET',
+        url: this._automationURL,
+        headers: headers,
+        xhrFields: this._xhrFields
+      })
+      .done(function(data, textStatus, jqXHR) {
         if (callback) {
           callback(null, data, jqXHR);
         }
       })
-      .fail(function (jqXHR, textStatus, errorThrown) {
+      .fail(function(jqXHR, textStatus, errorThrown) {
         if (callback) {
           callback(errorThrown, null, jqXHR);
         }
@@ -137,11 +142,9 @@ var nuxeo = (function(nuxeo) {
   };
 
   Client.prototype.operation = function(id) {
-    return new Operation( {
+    return new Operation({
       id: id,
       url: this._automationURL,
-      username: this._username,
-      password: this._password,
       timeout: this._timeout,
       repositoryName: this._repositoryName,
       schemas: this._schemas,
@@ -152,8 +155,6 @@ var nuxeo = (function(nuxeo) {
   Client.prototype.request = function(path) {
     return new Request({
       url: this._restURL,
-      username: this._username,
-      password: this._password,
       path: path,
       timeout: this._timeout,
       repositoryName: this._repositoryName,
@@ -174,11 +175,8 @@ var nuxeo = (function(nuxeo) {
   };
 
   Client.prototype.uploader = function(options) {
-    options = jQuery.extend(true, options,  {
+    options = jQuery.extend(true, options, {
       automationURL: this._automationURL,
-      username: this._username,
-      password: this._password,
-      data: data,
       timeout: this._timeout,
       repositoryName: this._repositoryName,
       headers: this._headers
@@ -192,8 +190,6 @@ var nuxeo = (function(nuxeo) {
   var Operation = function(options) {
     this._id = options.id;
     this._url = options.url;
-    this._username = options.username;
-    this._password = options.password;
     this._timeout = options.timeout;
     this._overrideMimeType = options.overrideMimeType;
     this._repositoryName = options.repositoryName;
@@ -294,21 +290,13 @@ var nuxeo = (function(nuxeo) {
     }
     headers = jQuery.extend(true, headers, options.headers || {});
 
-    var xhrFields = {};
-    if (this._username && this._password) {
-      headers['Authorization'] = 'Basic ' + btoa(this._username + ':' + this._password);
-      xhrFields = {
-        withCredentials: true
-      }
-    }
-
     var self = this;
     var xhrParams = {
       type: 'POST',
       timeout: this._timeout,
       headers: headers,
       url: getOperationURL(this._url, this._id),
-      xhrFields: xhrFields,
+      xhrFields: this._xhrFields,
       beforeSend: function(xhr) {
         if (self._overrideMimeType) {
           xhr.overrideMimeType(self._overrideMimeType);
@@ -319,13 +307,13 @@ var nuxeo = (function(nuxeo) {
     if (typeof this._automationParams.input === 'object') {
       // multipart
       var automationParams = {
-        params : this._automationParams.params,
-        context : this._automationParams.context
+        params: this._automationParams.params,
+        context: this._automationParams.context
       };
 
       var formData = new FormData();
-      var params = new Blob([ JSON.stringify(automationParams) ], {
-        'type' : 'application/json+nxrequest'
+      var params = new Blob([JSON.stringify(automationParams)], {
+        'type': 'application/json+nxrequest'
       });
       formData.append('request', params, 'request');
       formData.append(options.filename, this._automationParams.input, options.filename);
@@ -339,12 +327,12 @@ var nuxeo = (function(nuxeo) {
     }
 
     jQuery.ajax(xhrParams)
-      .done(function (data, textStatus, jqXHR) {
+      .done(function(data, textStatus, jqXHR) {
         if (callback) {
           callback(null, data, jqXHR)
         }
       })
-      .fail(function (jqXHR, textStatus, errorThrown) {
+      .fail(function(jqXHR, textStatus, errorThrown) {
         if (callback) {
           callback(errorThrown, null, jqXHR)
         }
@@ -355,8 +343,6 @@ var nuxeo = (function(nuxeo) {
     options = jQuery.extend(true, {}, options, {
       operationId: this._id,
       url: this._url,
-      username: this._username,
-      password: this._password,
       timeout: this._timeout,
       repositoryName: this._repositoryName,
       headers: this._headers,
@@ -372,8 +358,6 @@ var nuxeo = (function(nuxeo) {
   var Request = function(options) {
     this._path = options.path || '';
     this._url = options.url;
-    this._username = options.username;
-    this._password = options.password;
     this._timeout = options.timeout;
     this._overrideMimeType = options.overrideMimeType;
     this._repositoryName = options.repositoryName;
@@ -445,7 +429,9 @@ var nuxeo = (function(nuxeo) {
       callback = options;
       options = {};
     }
-    this.headers({ 'Content-Type': 'application/json' });
+    this.headers({
+      'Content-Type': 'application/json'
+    });
     if (options.data && typeof options.data !== 'string') {
       options.data = JSON.stringify(options.data);
     }
@@ -461,7 +447,9 @@ var nuxeo = (function(nuxeo) {
       callback = options;
       options = {};
     }
-    this.headers({ 'Content-Type': 'application/json' });
+    this.headers({
+      'Content-Type': 'application/json'
+    });
     if (options.data && typeof options.data !== 'string') {
       options.data = JSON.stringify(options.data);
     }
@@ -477,6 +465,9 @@ var nuxeo = (function(nuxeo) {
       callback = options;
       options = {};
     }
+    this.headers({
+      'Content-Type': 'application/json'
+    });
     options = jQuery.extend(true, options, {
       method: 'delete'
     });
@@ -518,21 +509,13 @@ var nuxeo = (function(nuxeo) {
     path = join(path, this._path);
     var data = options.data || query;
 
-    var xhrFields = {};
-    if (this._username && this._password) {
-      headers['Authorization'] = 'Basic ' + btoa(this._username + ':' + this._password);
-      xhrFields = {
-        withCredentials: true
-      }
-    }
-
     var xhrParams = {
       type: options.method,
       timeout: this._timeout,
       headers: headers,
       data: data,
       url: join(this._url, path),
-      xhrFields: xhrFields,
+      xhrFields: this._xhrFields,
       beforeSend: function(xhr) {
         if (self._overrideMimeType) {
           xhr.overrideMimeType(self._overrideMimeType);
@@ -541,12 +524,12 @@ var nuxeo = (function(nuxeo) {
     };
 
     jQuery.ajax(xhrParams)
-      .done(function (data, textStatus, jqXHR) {
+      .done(function(data, textStatus, jqXHR) {
         if (callback) {
           callback(null, data, jqXHR)
         }
       })
-      .fail(function (jqXHR, textStatus, errorThrown) {
+      .fail(function(jqXHR, textStatus, errorThrown) {
         if (callback) {
           callback(errorThrown, null, jqXHR)
         }
@@ -630,8 +613,7 @@ var nuxeo = (function(nuxeo) {
     request.timeout(this._timeout).schemas(this._schemas).headers(this._headers)
       .repositoryName(this.repository);
     request.get(function(error, data, response) {
-      if (data !== undefined && typeof data === 'object'
-        && data['entity-type'] === 'document') {
+      if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
         data = self._client.document(data);
       }
       if (callback) {
@@ -649,9 +631,10 @@ var nuxeo = (function(nuxeo) {
     var request = this._client.request(path);
     request.timeout(this._timeout).schemas(this._schemas).headers(this._headers)
       .repositoryName(this.repository);
-    request.post({ data: data }, function(error, data, response) {
-      if (data !== undefined && typeof data === 'object'
-        && data['entity-type'] === 'document') {
+    request.post({
+      data: data
+    }, function(error, data, response) {
+      if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
         data = self._client.document(data);
       }
       if (callback) {
@@ -659,6 +642,38 @@ var nuxeo = (function(nuxeo) {
       }
     });
   };
+
+  Document.prototype.copy = function(data, callback) {
+    var self = this;
+    var operation = this._client.operation('Document.Copy');
+    operation.timeout(this._timeout).schemas(this._schemas).headers(this._headers)
+      .repositoryName(this.repository)
+      .input(this.uid).params(data);
+    operation.execute(function(error, data, response) {
+      if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
+        data = self._client.document(data);
+      }
+      if (callback) {
+        callback(error, data, response);
+      }
+    });
+  }
+
+  Document.prototype.move = function(data, callback) {
+    var self = this;
+    var operation = this._client.operation('Document.Move');
+    operation.timeout(this._timeout).schemas(this._schemas).headers(this._headers)
+      .repositoryName(this.repository)
+      .input(this.uid).params(data);
+    operation.execute(function(error, data, response) {
+      if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
+        data = self._client.document(data);
+      }
+      if (callback) {
+        callback(error, data, response);
+      }
+    });
+  }
 
   Document.prototype.update = function(data, callback) {
     var self = this;
@@ -669,9 +684,10 @@ var nuxeo = (function(nuxeo) {
     var request = this._client.request(path);
     request.timeout(this._timeout).schemas(this._schemas).headers(this._headers)
       .repositoryName(this.repository);
-    request.put({ data: data }, function(error, data, response) {
-      if (data !== undefined && typeof data === 'object'
-        && data['entity-type'] === 'document') {
+    request.put({
+      data: data
+    }, function(error, data, response) {
+      if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
         data = self._client.document(data);
       }
       if (callback) {
@@ -686,8 +702,7 @@ var nuxeo = (function(nuxeo) {
     var request = this._client.request(path);
     request.timeout(this._timeout).schemas(this._schemas).headers(this._headers).repositoryName(this.repository);
     request.delete(function(error, data, response) {
-      if (data !== undefined && typeof data === 'object'
-        && data['entity-type'] === 'document') {
+      if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
         data = self._client.document(data);
       }
       if (callback) {
@@ -711,8 +726,7 @@ var nuxeo = (function(nuxeo) {
     request.timeout(this._timeout).schemas(this._schemas).headers(this._headers)
       .repositoryName(this.repository);
     request.get(function(error, data, response) {
-      if (data !== undefined && typeof data === 'object'
-        && data['entity-type'] === 'document') {
+      if (data !== undefined && typeof data === 'object' && data['entity-type'] === 'document') {
         data = self._client.document(data);
       }
       if (callback) {
@@ -727,27 +741,19 @@ var nuxeo = (function(nuxeo) {
     // define if upload should be triggered directly
     directUpload: true,
     // update upload speed every second
-    uploadRateRefreshTime : 1000,
-    batchStartedCallback: function(batchId) {
-    },
-    batchFinishedCallback: function(batchId) {
-    },
-    uploadStartedCallback: function(fileIndex, file) {
-    },
-    uploadFinishedCallback: function(fileIndex, file, time) {
-    },
-    uploadProgressUpdatedCallback: function(fileIndex, file, newProgress) {
-    },
-    uploadSpeedUpdatedCallback: function(fileIndex, file, speed) {
-    }
+    uploadRateRefreshTime: 1000,
+    batchStartedCallback: function(batchId) {},
+    batchFinishedCallback: function(batchId) {},
+    uploadStartedCallback: function(fileIndex, file) {},
+    uploadFinishedCallback: function(fileIndex, file, time) {},
+    uploadProgressUpdatedCallback: function(fileIndex, file, newProgress) {},
+    uploadSpeedUpdatedCallback: function(fileIndex, file, speed) {}
   };
 
 
   var Uploader = function(options) {
     options = jQuery.extend(true, {}, DEFAULT_UPLOADER_OPTIONS, options || {});
     this._url = options.url;
-    this._username = options.username;
-    this._password = options.password;
     this._operationId = options.operationId;
     this._automationParams = {
       params: {},
@@ -758,7 +764,7 @@ var nuxeo = (function(nuxeo) {
     this._numConcurrentUploads = options.numConcurrentUploads;
     this._directUpload = options.directUpload;
     this._uploadRateRefreshTime = options.uploadRateRefreshTime;
-    this._batchStartedCallback = options.batchFinishedCallback;
+    this._batchStartedCallback = options.batchStartedCallback;
     this._batchFinishedCallback = options.batchFinishedCallback;
     this._uploadStartedCallback = options.uploadStartedCallback;
     this._uploadFinishedCallback = options.uploadFinishedCallback;
@@ -773,8 +779,7 @@ var nuxeo = (function(nuxeo) {
     this._nbUploadInProgress = 0;
     this._completedUploads = [];
 
-    this.batchId = 'batch-' + new Date().getTime() + '-'
-      + Math.floor(Math.random() * 100000);
+    this.batchId = 'batch-' + new Date().getTime() + '-' + Math.floor(Math.random() * 100000);
     this._automationParams.params['operationId'] = this._operationId;
     this._automationParams.params['batchId'] = this.batchId;
   };
@@ -813,9 +818,7 @@ var nuxeo = (function(nuxeo) {
     var self = this;
     if (this._nbUploadInProgress >= this._numConcurrentUploads) {
       this._sendingRequestsInProgress = false;
-      log('delaying upload for next file(s) ' + this._uploadIndex
-        + '+ since there are already ' + this._nbUploadInProgress
-        + ' active uploads');
+      log('delaying upload for next file(s) ' + this._uploadIndex + '+ since there are already ' + this._nbUploadInProgress + ' active uploads');
       return;
     }
 
@@ -848,11 +851,12 @@ var nuxeo = (function(nuxeo) {
       // Safari),
       // it fires too early, before the server has returned its response.
       // still it is required for Firefox
+      var self = this;
       if (navigator.userAgent.indexOf('Firefox') > -1) {
         upload.addEventListener('load', function(event) {
           log('trigger load');
           log(event);
-          this._load(event.target)
+          self._load(event.target)
         }, false);
       }
 
@@ -869,20 +873,24 @@ var nuxeo = (function(nuxeo) {
       var uploadTimeoutS = 5 + (this._timeout / 1000) | 0;
       var targetUrl = join(this._url, 'batch/upload');
 
+      var headers = jQuery.extend(true, {}, this._headers);
+      headers['Cache-Control'] = 'no-cache';
+      headers['X-Requested-With'] = 'XMLHttpRequest';
+      headers['X-File-Name'] = encodeURIComponent(file.name);
+      headers['X-File-Size'] = file.size;
+      headers['X-File-Type'] = file.type;
+      headers['X-Batch-Id'] = this.batchId;
+      headers['X-File-Idx'] = this._uploadIndex;
+      headers['Nuxeo-Transaction-Timeout'] = uploadTimeoutS;
+      if (this._repositoryName !== undefined) {
+        headers['X-NXRepository'] = this._repositoryName;
+      }
+
       log('starting upload for file ' + this._uploadIndex);
       xhr.open('POST', targetUrl);
-      xhr.setRequestHeader('Cache-Control', 'no-cache');
-      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-      xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
-      xhr.setRequestHeader('X-File-Size', file.size);
-      xhr.setRequestHeader('X-File-Type', file.type);
-      xhr.setRequestHeader('X-Batch-Id', this.batchId);
-      xhr.setRequestHeader('X-File-Idx', this._uploadIndex);
-      xhr.setRequestHeader('Nuxeo-Transaction-Timeout', uploadTimeoutS);
-
-      if (this._username && this._password) {
-        xhr.setRequestHeader('Authorization', 'Basic ' + btoa(this._username + ':' + this._password));
-      }
+      jQuery.each(headers, function(key, value) {
+        xhr.setRequestHeader(key, value);
+      });
 
       this._nbUploadInProgress++;
       this._uploadStartedCallback(this._uploadIndex, file);
@@ -892,9 +900,7 @@ var nuxeo = (function(nuxeo) {
 
       if (this._nbUploadInProgress >= this._numConcurrentUploads) {
         this._sendingRequestsInProgress = false;
-        log('delaying upload for next file(s) ' + this._uploadIndex
-          + '+ since there are already '
-          + this._nbUploadInProgress + ' active uploads');
+        log('delaying upload for next file(s) ' + this._uploadIndex + '+ since there are already ' + this._nbUploadInProgress + ' active uploads');
         return;
       }
     }
@@ -912,15 +918,10 @@ var nuxeo = (function(nuxeo) {
     var headers = jQuery.extend(true, {}, this._headers);
     headers['Nuxeo-Transaction-Timeout'] = 5 + (this._timeout / 1000) | 0;
     headers['Content-Type'] = 'application/json+nxrequest';
-    headers = jQuery.extend(true, headers, options.headers || {});
-
-    var xhrFields = {};
-    if (this._username && this._password) {
-      headers['Authorization'] = 'Basic ' + btoa(this._username + ':' + this._password);
-      xhrFields = {
-        withCredentials: true
-      }
+    if (this._repositoryName !== undefined) {
+      headers['X-NXRepository'] = this._repositoryName;
     }
+    headers = jQuery.extend(true, headers, options.headers || {});
 
     var xhrParams = {
       type: 'POST',
@@ -928,16 +929,16 @@ var nuxeo = (function(nuxeo) {
       headers: headers,
       data: JSON.stringify(this._automationParams),
       url: join(this._url, 'batch/execute'),
-      xhrFields: xhrFields
+      xhrFields: this._xhrFields
     };
 
     jQuery.ajax(xhrParams)
-      .done(function (data, textStatus, jqXHR) {
+      .done(function(data, textStatus, jqXHR) {
         if (callback) {
           callback(null, data, jqXHR)
         }
       })
-      .fail(function (jqXHR, textStatus, errorThrown) {
+      .fail(function(jqXHR, textStatus, errorThrown) {
         if (callback) {
           callback(errorThrown, null, jqXHR)
         }
@@ -946,8 +947,7 @@ var nuxeo = (function(nuxeo) {
 
   Uploader.prototype._readyStateChange = function(xhr) {
     var upload = xhr.upload;
-    log('readyStateChange event on file upload ' + upload.fileIndex
-      + ' (state : ' + xhr.readyState + ')');
+    log('readyStateChange event on file upload ' + upload.fileIndex + ' (state : ' + xhr.readyState + ')');
     if (xhr.readyState == 4) {
       if (xhr.status == 200) {
         this._load(upload);
@@ -975,14 +975,13 @@ var nuxeo = (function(nuxeo) {
       upload.callback(upload.fileIndex, upload.fileObj,
         timeDiff);
     }
-    this._nbUploadInprogress--;
-    if (!this._sendingRequestsInProgress && this._uploadStack.length > 0
-      && this._nbUploadInprogress < this._numConcurrentUploads) {
+    this._nbUploadInProgress--;
+    if (!this._sendingRequestsInProgress && this._uploadStack.length > 0 && this._nbUploadInProgress < this._numConcurrentUploads) {
       // restart upload
       log('restart pending uploads');
       this.uploadFiles();
     } else if (this._nbUploadInProgress == 0) {
-      this._batchFinishedCallback(batchId);
+      this._batchFinishedCallback(this.batchId);
     }
   };
 
@@ -992,8 +991,7 @@ var nuxeo = (function(nuxeo) {
       var percentage = Math.round((event.loaded * 100) / event.total);
       if (event.target.currentProgress != percentage) {
 
-        log('progress event on upload of file '
-          + event.target.fileIndex + ' --> ' + percentage + '%');
+        log('progress event on upload of file ' + event.target.fileIndex + ' --> ' + percentage + '%');
 
         event.target.currentProgress = percentage;
         this._uploadProgressUpdatedCallback(
@@ -1013,8 +1011,7 @@ var nuxeo = (function(nuxeo) {
           event.target.currentStart = elapsed;
         }
         if (event.loaded == event.total) {
-          log('file ' + event.target.fileIndex
-            + ' detected upload complete');
+          log('file ' + event.target.fileIndex + ' detected upload complete');
           // having all the bytes sent to the server does not mean the
           // server did actually receive everything
           // but since load event is not reliable on Webkit we need
@@ -1022,8 +1019,7 @@ var nuxeo = (function(nuxeo) {
           // window.setTimeout(function(){load(event.target, opts);},
           // 5000);
         } else {
-          log('file ' + event.target.fileIndex + ' not completed :'
-            + event.loaded + '/' + event.total);
+          log('file ' + event.target.fileIndex + ' not completed :' + event.loaded + '/' + event.total);
         }
       }
     }

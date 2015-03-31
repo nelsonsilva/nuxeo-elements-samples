@@ -1,9 +1,8 @@
 # Client Library for Nuxeo API
 
-JavaScript client library for the Nuxeo Automation and REST API.
+The Nuxeo JavaScript Client is a JavaScript client library for the Nuxeo Automation and REST API. The library can work in a browser, or in Node.js, using the same API.
 
-The library can work in a browser, or in Node.js, using the same API.
-
+This is an on-going project, supported by Nuxeo.
 
 # Getting Started
 
@@ -18,7 +17,7 @@ Just copy the `lib/jquery/nuxeo.js` file in your application and include it in y
 The `nuxeo` client can be also installed through bower:
 
     $ bower install nuxeo
-    
+
 #### Note about the jQuery version
 
 We require jQuery version 1.8.3 as a minimum version, you can of course use any version >= 1.8.3 through your own `bower.json` file:
@@ -39,7 +38,9 @@ After installing [Node.js](http://nodejs.org/#download), use `npm` to install th
 
 Then, use the following `require` statement to have access to the same API than the browser client:
 
-    var nuxeo = require('nuxeo');
+```javascript
+var nuxeo = require('nuxeo');
+```
 
 You can also install the current development version with:
 
@@ -53,52 +54,134 @@ You can also install the current development version with:
 
 To be able to make API calls on a Nuxeo server, you need to create a `Client` object:
 
-    var client = new nuxeo.Client();
+```javascript
+var client = new nuxeo.Client();
+```
 
 Default values are not the same in the browser or in Node.js.
 
 Default values in the browser are:
 
-    {
-      baseURL: '/nuxeo',
-      restPath: 'site/api/v1',
-      automationPath: 'site/automation',
-      username: null,
-      password: null,
-      timeout: 3000
-    }
+```javascript
+{
+  baseURL: '/nuxeo',
+  restPath: 'site/api/v1',
+  automationPath: 'site/automation',
+  auth: {
+    method: 'basic',
+    username: null,
+    password: null
+  },
+  timeout: 3000
+}
+```
 
 Default values in Node.js are:
 
-    {
-      baseURL: 'http://localhost:8080/nuxeo/',
-      restPath: 'site/api/v1/',
-      automationPath: 'site/automation/',
-      username: 'Administrator',
-      password: 'Administrator',
-      timeout: 3000
-    }
-
+```javascript
+{
+  baseURL: 'http://localhost:8080/nuxeo/',
+  restPath: 'site/api/v1/',
+  automationPath: 'site/automation/',
+  auth: {
+    method: 'basic',
+    username: 'Administrator',
+    password: 'Administrator'
+  },
+  timeout: 3000
+}
+```
 
 To connect to a different Nuxeo server, you can use the following:
 
-    var client = new nuxeo.Client({
-      baseURL: 'http://demo.nuxeo.com',
-      username: 'Administrator',
-      password: 'Administrator
-    })
+```javascript
+var client = new nuxeo.Client({
+  baseURL: 'http://demo.nuxeo.com/nuxeo'
+});
+```
+
+### Authentication
+
+The authentication method is configured when creating a `Client` object. You cannot change the authentication method on an existing `Client`.
+
+If you need to use another authentication method, create a new `Client`.
+
+#### jQuery
+
+The jQuery client only offers the `basic` authentication for now.
+
+To connect with `myuser`:
+
+```javascript
+var client = new nuxeo.Client({
+  auth: {
+    // optional, default to 'basic'
+    method: 'basic',
+    username: 'myuser',
+    password: 'mysecretpassword'
+  }
+})
+```
+
+#### Node.js
+
+The Node.js client supports the following authentication method: `basic`, `proxy` and `portal`.
+
+##### basic
+
+```javascript
+var client = new nuxeo.Client({
+  auth: {
+    // optional, default to 'basic'
+    method: 'basic',
+    username: 'myuser',
+    password: 'mysecretpassword'
+  }
+})
+```
+
+##### proxy
+
+To configure a `proxy` authentication:
+
+```javascript
+var client = new nuxeo.Client({
+  auth: {
+    method: 'proxy',
+    username: 'myuser',
+    // optional header name, default is 'Auth-User'
+    proxyAuthHeaderName: 'Custom-Header-Name'
+  }
+})
+```
+
+##### portal
+
+To configure a `portal` authentication:
+
+```javascript
+var client = new nuxeo.Client({
+  auth: {
+    method: 'portal',
+    username: 'myuser',
+    secret: 'nuxeo5secret'
+  }
+})
+```
 
 ### Testing the Connection
 
-    client.connect(function(error, client) {
-      if (error) {
-        // cannot connect
-        throw error;
-      }
+```javascript
+client.connect(function(error, client) {
+  if (error) {
+    // cannot connect
+    throw error;
+  }
 
-      // OK, the returned client is connected
-      console.log('Client is connected: ' + client.connected);
-    });
+  // OK, the returned client is connected
+  console.log('Client is connected: ' + client.connected);
+});
+```
 
 ### Client Methods
 
@@ -136,22 +219,23 @@ Adds a schema to the default list of schemas to retrieved when fetching document
 
 Adds schemas to the default list of schemas to retrieved when fetching documents (`X-NXDocumentProperties` header).
 
-
-## Making API Calls!
+## Making API Calls
 
 ### Callbacks and Error Handling
 
 Most of the methods that actually make an API call can take a callback in the form:
 
-    function(error, data, response /* the response from Restler, or jqXHR from jQuery when using browser client */) {
-      if (error) {
-        // something went wrong
-        showError(error);
-      }
+```javascript
+function(error, data, response /* the response from Restler, or jqXHR from jQuery when using browser client */) {
+  if (error) {
+    // something went wrong
+    showError(error);
+  }
 
-      // OK
-      console.log(data);
-    }
+  // OK
+  console.log(data);
+}
+```
 
 ### Automation API
 
@@ -161,34 +245,38 @@ Automation calls are made through the `Operation` object returned by the `client
 
 Retrieving the Root children document:
 
-    client.operation('Document.GetChildren')
-      .input('doc:/')
-      .execute(function(error, children) {
-        if (error) {
-          // something went wrong
-          throw error;
-        }
+```javascript
+client.operation('Document.GetChildren')
+  .input('doc:/')
+  .execute(function(error, children) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
 
-        console.log('Root document has ' + children.entries.length + ' children');
-      });
+    console.log('Root document has ' + children.entries.length + ' children');
+  });
+```
 
 Creating a Folder in the Root document:
 
-    client.operation('Document.Create')
-      .params({
-        type: 'Folder',
-        name: 'My Folder',
-        properties: 'dc:title=My Folder \ndc:description=A Simple Folder'
-      })
-      .input('doc:/')
-      .execute(function(error, folder) {
-        if (error) {
-          // something went wrong
-          throw error;
-        }
+```javascript
+client.operation('Document.Create')
+  .params({
+    type: 'Folder',
+    name: 'My Folder',
+    properties: 'dc:title=My Folder \ndc:description=A Simple Folder'
+  })
+  .input('doc:/')
+  .execute(function(error, folder) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
 
-        console.log('Created ' + folder.title + ' folder')
-      });
+    console.log('Created ' + folder.title + ' folder')
+  });
+```
 
 See [automation.js](test/automation.js) for more samples.
 
@@ -196,7 +284,9 @@ See [automation.js](test/automation.js) for more samples.
 
 Assuming you have created an `Operation` object,
 
-    var operation = client.operation('Document.GetChildren');
+```javascript
+var operation = client.operation('Document.GetChildren');
+```
 
 you can have access to the following methods.
 
@@ -229,6 +319,31 @@ Executes this operation.
 
 #### Samples
 
+Upload a blob to an existing document. In this example, `file` is a File JavaScript object, as filled when using the `<input type="file" .../>` HTML object.
+
+```javascript
+// Create the uploader bound to the operation
+var uploader = client.operation("Blob.Attach")
+  .params({ document: existingDocId,
+    save : true,
+    xpath: "file:content"
+  })
+  .uploader();
+
+// Upload the file
+uploader.uploadFile(file, function(fileIndex, file, timeDiff) {
+  // When done, execute the operation
+  uploader.execute(function(error, data) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
+
+    // successfully attached blob
+  });
+}
+```
+
 See [uploader.js](test/uploader.js) for more samples.
 
 ### REST API
@@ -239,45 +354,53 @@ REST API calls are made through the `Request` object returned by the `client.req
 
 Fetching the Root document:
 
-    client.request('path/')
-      .get(function(error, root) {
-        if (error) {
-          // something went wrong
-          throw error;
-        }
+```javascript
+client.request('path/')
+  .get(function(error, root) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
 
-        console.log('Fetched ' + root.title + ' document')
-      });
+    console.log('Fetched ' + root.title + ' document')
+  });
+```
 
 Fetching Administrator user:
 
-    client.request('user/Administrator')
-      .get(function(error, user) {
-        if (error) {
-          // something went wrong
-          throw error;
-        }
+```javascript
+client.request('user/Administrator')
+  .get(function(error, user) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
 
-        console.log(user)
-      });
+    console.log(user)
+  });
+```
 
 Fetching the whole list of Natures:
 
-    client.request('directory/nature')
-      .get(function(error, data) {
-        if (error) {
-          // something went wrong
-          throw error;
-        }
+```javascript
+client.request('directory/nature')
+  .get(function(error, data) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
 
-        console.log(JSON.stringify(data.entries, null, 2))
-      });
+    console.log(JSON.stringify(data.entries, null, 2))
+  });
+```
 
 #### Available Methods
 
 Assuming you have created an `Request` object,
 
-    var request = client.request('path/');
+```javascript
+var request = client.request('path/');
+```
 
 you can have access to the following methods.
 
@@ -323,21 +446,111 @@ a new `Document` object.
 
 #### Samples
 
-Fetch and update the Root description
+Creating a Folder in the Root document:
 
-    client.document('/')
-      .fetch(function(error, doc) {
-        if (error) {
-          // something went wrong
-          throw error;
-        }
+```javascript
+client.document('/')
+  .create({
+    type: 'Folder',
+    name: 'My Folder',
+    properties: {
+      "dc:title": "My Folder",
+      "dc:description": "A Simple Folder"
+    }
+  }, function(error, folder) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
 
-        doc.set({ 'dc:description': 'An updated description' });
-        doc.save(function(error, doc) {
+    console.log('Created ' + folder.title + ' folder')
+  });
+```
 
-          console.log('Successfully updated ' + doc.title + ' with new description: ' + doc.properties['dc:description']);
-        });
-      });
+Fetching and updating the Root description
+
+```javascript
+client.document('/')
+  .fetch(function(error, doc) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
+
+    doc.set({ 'dc:description': 'An updated description' });
+    doc.save(function(error, doc) {
+
+      console.log('Successfully updated ' + doc.title + ' with new description: ' + doc.properties['dc:description']);
+    });
+  });
+```
+
+Moving a document
+
+```javascript
+client.document('/my-doc')
+  .fetch(function(error, doc) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
+
+    doc.move({
+      target: '/my-new-folder',
+      // optional new name
+      name: 'my-new-name-doc'
+    }, function(error, doc) {
+      console.log('Successfully moved ' + doc.title + ', updated path: ' + doc.path);
+    });
+  });
+```
+
+Copying a document
+
+```javascript
+client.document('/my-doc')
+  .fetch(function(error, doc) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
+
+    doc.copy({
+      target: '/my-new-folder',
+      // optional new name
+      name: 'my-new-name-doc'
+    }, function(error, doc) {
+      console.log('Successfully copied ' + doc.title + 'to : ' + doc.path);
+    });
+  });
+```
+
+Setting a complex property. Assuming the document has a complex field `schema:author` which contains 3 fields `firstName`, `lastName` and `email`.
+
+```javascript
+client.document('/my-doc')
+  .fetch(function(error, doc) {
+    if (error) {
+      // something went wrong
+      throw error;
+    }
+
+    var firstName = ...,
+      lastName = ...,
+      email = ...;
+    doc.set({
+      'schema:author': {
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email
+      }
+    });
+    doc.save(function(error, doc) {
+      console.log('Successfully updated ' + doc.title);
+      console.log(JSON.stringify(doc.properties['schema:author'], null, 2));
+    });
+  });
+```
 
 See [document.js](test/document.js) for more samples.
 
@@ -345,7 +558,9 @@ See [document.js](test/document.js) for more samples.
 
 Assuming you have created a `Document` object on the Root document,
 
-    var document = client.document('/');
+```javascript
+var document = client.document('/');
+```
 
 you can have access to the following methods.
 
@@ -365,6 +580,32 @@ Updates (executes a PUT request on) the referenced document with the given `data
 
 Deletes (executes a DELETE request on) the referenced document.
 
+**document.copy(data, callback)**
+
+Copies the referenced document. It internally uses the `Document.Copy` operation.
+
+It accepts through the `data` object the parameters used by the `Document.Copy` operation:
+
+```javascript
+data = {
+  target: targetDocId,
+  name: newName
+}
+```
+
+**document.move(data, callback)**
+
+Moves the referenced document. It internally uses the `Document.Move` operation.
+
+It accepts through the `data` object the parameters used by the `Document.Move` operation:
+
+```javascript
+data = {
+  target: targetDocId,
+  name: newName
+}
+```
+
 **document.set(properties)**
 
 Sets properties (locally) on the document. The updated properties are marked as dirty,
@@ -381,8 +622,41 @@ To be called after setting properties with `document.set()`.
 
 Retrieves the children of the referenced document.
 
+# Migrating from 0.3.x
+
+Authentication on both clients has changed. All information needed for authentication are now in an `auth` object when creating a `Client`.
+
+Before:
+
+```javascript
+var client = nuxeo.client({
+  username: 'Administrator',
+  password: 'Administrator'
+})
+```
+
+After:
+
+```javascript
+var client = nuxeo.client({
+  auth: {
+    // optional method, default to 'basic'
+    method: 'basic',
+    username: 'Administrator',
+    password: 'Administrator'
+  }
+})
+```
+
 
 # Development
+
+## Requirements
+
+* [Node.js](http://nodejs.org/#download)
+* [gulp](http://gulpjs.com/)
+* [Bower](http://bower.io/)
+* [npm](https://www.npmjs.com/)
 
 ## Setup
 
@@ -401,14 +675,13 @@ To run the tests, use the following:
 
 For now, only the node client is tested through `gulp test`.
 
+## Reporting Issues
+
+You can follow the developments in the Nuxeo JS Client project of our JIRA bug tracker: [https://jira.nuxeo.com/browse/NXJS](https://jira.nuxeo.com/browse/NXJS).
+
+You can report issues on [answers.nuxeo.com](http://answers.nuxeo.com).
+
 
 ## About Nuxeo
 
-Nuxeo provides a modular, extensible Java-based [open source software platform for enterprise content management] [1] and packaged applications for [document management] [2], [digital asset management] [3] and [case management] [4]. Designed by developers for developers, the Nuxeo platform offers a modern architecture, a powerful plug-in model and extensive packaging capabilities for building content applications.
-
-[1]: http://www.nuxeo.com/en/products/ep
-[2]: http://www.nuxeo.com/en/products/document-management
-[3]: http://www.nuxeo.com/en/products/dam
-[4]: http://www.nuxeo.com/en/products/case-management
-
-More information on: <http://www.nuxeo.com/>
+Nuxeo dramatically improves how content-based applications are built, managed and deployed, making customers more agile, innovative and successful. Nuxeo provides a next generation, enterprise ready platform for building traditional and cutting-edge content oriented applications. Combining a powerful application development environment with SaaS-based tools and a modular architecture, the Nuxeo Platform and Products provide clear business value to some of the most recognizable brands including Verizon, Electronic Arts, Netflix, Sharp, FICO, the U.S. Navy, and Boeing. Nuxeo is headquartered in New York and Paris. More information is available at [www.nuxeo.com](http://www.nuxeo.com/).

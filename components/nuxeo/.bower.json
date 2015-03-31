@@ -7,14 +7,14 @@
     "jquery": ">= 1.8.3"
   },
   "homepage": "https://github.com/nuxeo/nuxeo-js-client",
-  "version": "0.2.0",
-  "_release": "0.2.0",
+  "version": "0.4.1",
+  "_release": "0.4.1",
   "_resolution": {
     "type": "version",
-    "tag": "0.2.0",
-    "commit": "9dfd94b754b1bf459315be2dbd1dfd7bb13df62c"
+    "tag": "v0.4.1",
+    "commit": "562f5eb2f7482686f9b9063186be9275b13270d7"
   },
   "_source": "git://github.com/nuxeo/nuxeo-js-client.git",
-  "_target": "^0.2.0",
+  "_target": "^0.4.1",
   "_originalSource": "nuxeo"
 }

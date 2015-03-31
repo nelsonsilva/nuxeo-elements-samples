@@ -101,7 +101,7 @@ Contributors:
     </core-toolbar>
 
     <div class="container" layout vertical center>
-        <nx-connection id="nx" url="http://demo.nuxeo.com/nuxeo"></nx-connection>
+        <nx-connection id="nx" url="http://localhost:8080/nuxeo"></nx-connection>
         <nx-listing>
             <nx-page-provider auto pageSize="5" query="select * from {{selectedDoctype}} where ecm:currentLifeCycleState != 'deleted'"></nx-page-provider>
             <template>
