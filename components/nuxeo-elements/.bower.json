@@ -13,13 +13,13 @@
     "es6-promise": "^2.0.0"
   },
   "homepage": "https://github.com/nuxeo/nuxeo-elements",
-  "_release": "16f1857a9b",
+  "_release": "32eb618315",
   "_resolution": {
     "type": "branch",
-    "branch": "master",
-    "commit": "16f1857a9ba0b8d7959e48a8cc75c9d6f777496e"
+    "branch": "feature-NXP-16788-webcomponents",
+    "commit": "32eb618315dc51517dbe83464b2fd8cb02d039c6"
   },
   "_source": "git://github.com/nuxeo/nuxeo-elements.git",
-  "_target": "master",
+  "_target": "feature-NXP-16788-webcomponents",
   "_originalSource": "nuxeo/nuxeo-elements"
 }
