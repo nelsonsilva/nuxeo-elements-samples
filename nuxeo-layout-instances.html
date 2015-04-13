@@ -6,6 +6,9 @@
     <script src="components/webcomponentsjs/webcomponents.js"></script>
     <link rel="import" href="components/font-roboto/roboto.html">
     <link rel="import" href="components/polymer/polymer.html">
+    <script>
+      HTMLImports.whenImportsReady = HTMLImports.whenReady;
+    </script>
 
     <link rel="import" href="components/nuxeo-elements/nx-connection.html">
     <link rel="import" href="components/nuxeo-elements/nx-resource.html">
@@ -62,7 +65,11 @@
 </head>
 <body fullbleed vertical layout>
 
-<nx-connection id="nx_connection" url="http://localhost:8080/nuxeo"></nx-connection>
+<nx-connection id="nx_connection"
+  url="http://localhost:8080/nuxeo"
+  username="Administrator"
+  password="Administrator">
+</nx-connection>
 <template is="auto-binding">
 
   <nx-resource auto id="doc" path="/path/default-domain/workspaces" data="{{doc}}"></nx-resource>
