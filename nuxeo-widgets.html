@@ -19,10 +19,8 @@ Contributors:
     <title>Nuxeo Widgets</title>
     <meta name="viewport"
           content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <script src="components/webcomponentsjs/webcomponents.js"></script>
+    <script src="components/webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="components/font-roboto/roboto.html">
-    <link rel="import" href="components/polymer/polymer.html">
-    <link rel="import" href="components/core-toolbar/core-toolbar.html">
     <link rel="import" href="components/nuxeo-elements/nx-connection.html">
     <link rel="import" href="components/nuxeo-elements/nx-widgets.html">
     <style>
@@ -32,12 +30,6 @@ Contributors:
         height: 100%;
         font-family: 'RobotoDraft', sans-serif;
       }
-
-      core-toolbar {
-          background: #03a9f4;
-          color: white;
-      }
-
       .container {
         width: 80%;
         margin: 50px auto;
@@ -60,67 +52,84 @@ Contributors:
         vertical-align: top;
         padding: 12px 12px 12px 0;
       }
-
-      html /deep/ input[is=core-input] {
-        border-bottom: 1px dotted #ccc;
-      }
       </style>
     </style>
 </head>
 <body>
-<nx-connection id="nx_connection" url="http://localhost:8080/nuxeo"></nx-connection>
+<nx-connection id="nx" url="http://localhost:8080/nuxeo"></nx-connection>
 
-<template is="auto-binding">
-  <core-toolbar>
-  </core-toolbar>
+<template is="dom-bind">
   <div class="container">
     <table>
     <thead><tr><th></th><th>View mode</th><th>Edit mode</th></tr></thead>
     <tbody>
     <tr>
       <td>Text</td>
+      <td>[[textValue]]</td>
       <td><nx-text value="{{textValue}}"></nx-text></td>
-      <td><nx-text mode="edit" value="{{textValue}}"></nx-text></td>
     </tr>
     <tr>
       <td>Textarea</td>
+      <td>[[textareaValue]]</td>
       <td><nx-textarea value="{{textareaValue}}"></nx-textarea></td>
-      <td><nx-textarea mode="edit" value="{{textareaValue}}"></nx-textarea></td>
     </tr>
     <tr>
       <td>Datetime</td>
+      <td>[[datetimeValue]]</td>
       <td><nx-datetime value="{{datetimeValue}}"></nx-datetime></td>
-      <td><nx-datetime mode="edit" value="{{datetimeValue}}"></nx-datetime></td>
     </tr>
     <tr>
       <td>Integer</td>
+      <td>[[intValue]]</td>
       <td><nx-integer value="{{intValue}}"></nx-integer></td>
-      <td><nx-integer mode="edit" value="{{intValue}}"></nx-integer></td>
     </tr>
     <tr>
       <td>Checkbox</td>
+      <td>[[boolValue]]</td>
       <td><nx-checkbox value="{{boolValue}}"></nx-checkbox></td>
-      <td><nx-checkbox mode="edit" value="{{boolValue}}"></nx-checkbox></td>
     </tr>
     <tr>
       <td>Richtext</td>
+      <td>[[richTextValue]]</td>
       <td><nx-richtext value="{{richTextValue}}"></nx-richtext></td>
-      <td><nx-richtext mode="edit" value="{{richTextValue}}"></nx-richtext></td>
     </tr>
     <tr>
       <td>Single Directory</td>
-      <td><nx-directory directoryName="subject" value="{{oneDirectoryValue}}"></nx-directory></td>
-      <td><nx-directory directoryName="subject" mode="edit" value="{{oneDirectoryValue}}"></nx-directory></td>
+      <td>[[oneDirectoryValue]]</td>
+      <td><nx-directory directory-name="subject" value="{{oneDirectoryValue}}"></nx-directory></td>
     </tr>
     <tr>
-      <td>Many Directory</td>
-      <td><nx-directory multiple directoryName="subject" value="{{manyDirectoryValue}}"></nx-directory></td>
-      <td><nx-directory multiple directoryName="subject" mode="edit" value="{{manyDirectoryValue}}"></nx-directory></td>
+      <td>Multiple Directory</td>
+      <td>[[multipleDirectoryValue]]</td>
+      <td><nx-directory directory-name="subject" multiple="true" value="{{multipleDirectoryValue}}"></nx-directory></td>
     </tr>
     <tr>
-      <td>Single Directory (dbl10n) </td>
-      <td><nx-directory directoryName="l10nsubjects" value="{{oneDirectoryValue2}}"></nx-directory></td>
-      <td><nx-directory directoryName="l10nsubjects" dbl10n="true" mode="edit" value="{{oneDirectoryValue2}}"></nx-directory></td>
+      <td>Single User Suggestion</td>
+      <td>[[userSuggestion]]</td>
+      <td>
+        <nx-user-suggestion value="{{userSuggestion}}"></nx-user-suggestion>
+      </td>
+    </tr>
+    <tr>
+      <td>Multiple User Suggestion</td>
+      <td>[[multipleUserSuggestion]]</td>
+      <td>
+        <nx-user-suggestion multiple="true" value="{{multipleUserSuggestion}}"></nx-user-suggestion>
+      </td>
+    </tr>
+    <tr>
+      <td>Single Document Suggestion</td>
+      <td>[[documentSuggestion]]</td>
+      <td>
+        <nx-document-suggestion value="{{documentSuggestion}}"></nx-document-suggestion>
+      </td>
+    </tr>
+    <tr>
+      <td>Multiple Document Suggestion</td>
+      <td>[[multipleDocumentSuggestion]]</td>
+      <td>
+        <nx-document-suggestion multiple="true" value="{{multipleDocumentSuggestion}}"></nx-document-suggestion>
+      </td>
     </tr>
     </tbody>
     </table>
