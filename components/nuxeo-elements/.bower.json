@@ -7,19 +7,20 @@
   "license": "LGPL",
   "private": true,
   "dependencies": {
-    "polymer": "Polymer/polymer#^0.5.1",
-    "core-elements": "Polymer/core-elements#^0.5.1",
+    "polymer": "Polymer/polymer#^1.x",
+    "iron-elements": "PolymerElements/iron-elements#^1.x",
     "nuxeo": "^0.4.1",
-    "es6-promise": "^2.0.0"
+    "es6-promise": "^2.0.0",
+    "select2": "3.5.2"
   },
   "homepage": "https://github.com/nuxeo/nuxeo-elements",
-  "_release": "32eb618315",
+  "_release": "192d0d1111",
   "_resolution": {
     "type": "branch",
-    "branch": "feature-NXP-16788-webcomponents",
-    "commit": "32eb618315dc51517dbe83464b2fd8cb02d039c6"
+    "branch": "master",
+    "commit": "192d0d1111a4e92c95890a292889e6f0be9fa454"
   },
   "_source": "git://github.com/nuxeo/nuxeo-elements.git",
-  "_target": "feature-NXP-16788-webcomponents",
+  "_target": "master",
   "_originalSource": "nuxeo/nuxeo-elements"
 }

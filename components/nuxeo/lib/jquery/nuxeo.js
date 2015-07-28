@@ -18,7 +18,7 @@ var nuxeo = (function(nuxeo) {
   var DEFAULT_CLIENT_OPTIONS = {
     baseURL: '/nuxeo',
     restPath: 'site/api/v1',
-    automationPath: 'site/automation',
+    automationPath: 'site/api/v1/automation',
     auth: {
       method: 'basic',
       username: null,
@@ -58,10 +58,8 @@ var nuxeo = (function(nuxeo) {
 
   Client.prototype.connect = function(callback) {
     var self = this;
-
-    var headers = {
-      'Accept': 'application/json'
-    };
+    var headers = jQuery.extend(true, {}, this._headers);
+    headers['Accept'] = 'application/json';
 
     jQuery.ajax({
         type: 'POST',
@@ -354,6 +352,8 @@ var nuxeo = (function(nuxeo) {
     return this._uploader;
   };
 
+  nuxeo.Operation = Operation;
+
 
   var Request = function(options) {
     this._path = options.path || '';
@@ -535,6 +535,8 @@ var nuxeo = (function(nuxeo) {
         }
       });
   };
+
+  nuxeo.Request = Request;
 
   var Document = function(options) {
     this._client = options.client;
@@ -734,6 +736,12 @@ var nuxeo = (function(nuxeo) {
       }
     });
   };
+
+  Document.prototype.isFolder = function() {
+    return this.facets.indexOf('Folderish') !== -1;
+  };
+
+  nuxeo.Document = Document;
 
 
   var DEFAULT_UPLOADER_OPTIONS = {
@@ -1024,6 +1032,8 @@ var nuxeo = (function(nuxeo) {
       }
     }
   };
+
+  nuxeo.Uploader = Uploader;
 
   return nuxeo;
 

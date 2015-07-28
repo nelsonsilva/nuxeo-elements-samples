@@ -28,7 +28,7 @@ rest.parsers.auto.matchers = {
 var DEFAULT_CLIENT_OPTIONS = {
   baseURL: 'http://localhost:8080/nuxeo/',
   restPath: 'site/api/v1/',
-  automationPath: 'site/automation/',
+  automationPath: 'site/api/v1/automation/',
   auth: {
     method: 'basic',
     username: 'Administrator',
@@ -757,6 +757,10 @@ Document.prototype.children = function(callback) {
       callback(error, data, response);
     }
   });
+};
+
+Document.prototype.isFolder = function() {
+  return this.facets.indexOf('Folderish') !== -1;
 };
 
 var DEFAULT_UPLOADER_OPTIONS = {

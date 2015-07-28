@@ -66,13 +66,13 @@ Default values in the browser are:
 {
   baseURL: '/nuxeo',
   restPath: 'site/api/v1',
-  automationPath: 'site/automation',
+  automationPath: 'site/api/v1/automation',
   auth: {
     method: 'basic',
     username: null,
     password: null
   },
-  timeout: 3000
+  timeout: 30000
 }
 ```
 
@@ -82,13 +82,13 @@ Default values in Node.js are:
 {
   baseURL: 'http://localhost:8080/nuxeo/',
   restPath: 'site/api/v1/',
-  automationPath: 'site/automation/',
+  automationPath: 'site/api/v1/automation/',
   auth: {
     method: 'basic',
     username: 'Administrator',
     password: 'Administrator'
   },
-  timeout: 3000
+  timeout: 30000
 }
 ```
 
