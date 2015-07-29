@@ -1,5 +1,5 @@
 <!--
-(C) Copyright 2014 Nuxeo SA (http://nuxeo.com/) and contributors.
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the GNU Lesser General Public License
@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 
 Contributors:
-  Nelson Silva <nelson.silva@inevo.pt>
+  Nelson Silva <nsilva@nuxeo.com>
 -->
 <html>
 <head>
@@ -52,7 +52,6 @@ Contributors:
         vertical-align: top;
         padding: 12px 12px 12px 0;
       }
-      </style>
     </style>
 </head>
 <body>
@@ -104,6 +103,16 @@ Contributors:
       <td><nx-directory directory-name="subject" multiple="true" value="{{multipleDirectoryValue}}"></nx-directory></td>
     </tr>
     <tr>
+      <td>Single Directory Suggestion</td>
+      <td>[[oneDirectorySuggestion]]</td>
+      <td><nx-directory-suggestion directory-name="subject" value="{{oneDirectorySuggestion}}"></nx-directory-suggestion></td>
+    </tr>
+    <tr>
+      <td>Multiple Directory Suggestion</td>
+      <td>[[multipleDirectorySuggestion]]</td>
+      <td><nx-directory-suggestion directory-name="subject" multiple="true" value="{{multipleDirectorySuggestion}}"></nx-directory-suggestion></td>
+    </tr>
+    <tr>
       <td>Single User Suggestion</td>
       <td>[[userSuggestion]]</td>
       <td>
@@ -134,7 +143,6 @@ Contributors:
     </tbody>
     </table>
   </div>
-
 </template>
 </body>
 </html>
