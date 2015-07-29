@@ -2,79 +2,41 @@
 <html>
 
 <head>
-    <title>Nuxeo elements samples</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Nuxeo elements samples</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <script src="components/webcomponentsjs/webcomponents.js"></script>
+  <script src="components/webcomponentsjs/webcomponents-lite.js"></script>
 
-    <link rel="import" href="components/core-icons/core-icons.html">
-    <link rel="import" href="components/sampler-scaffold/sampler-scaffold.html">
-    <link rel="import" href="components/font-roboto/roboto.html">
-    <link rel="import" href="components/core-item/core-item.html">
-    <link rel="import" href="components/core-menu/core-submenu.html">
-
-    <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        background-color: #eee;
-        font-family: 'RobotoDraft', sans-serif;
-      }
-
-
-      sampler-scaffold::shadow [main] core-toolbar {
-         background-color: #203f7d;
-         color: #fff;
-       }
-
-       sampler-scaffold::shadow [drawer] core-toolbar {
-         background: white url(http://0.assets.nuxeo.com/wp-content/themes/nuxeo.com_wp/imgs/logo340x60.png) no-repeat;
-         background-size: 200px;
-         background-position: 10px 30px;
-       }
-
-       sampler-scaffold::shadow #card.move-up {
-         transition: 0.38s -webkit-transform cubic-bezier(0.4, 0.0, 0.2, 1);
-         transition: 0.38s transform cubic-bezier(0.4, 0.0, 0.2, 1);
-       }
-
-       sampler-scaffold::shadow #card {
-         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-         transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-       }
-
-       sampler-scaffold::shadow core-icon-button.action-button {
-         position: absolute;
-         right: 14px;
-         bottom: -28px;
-         width: 56px;
-         height: 56px;
-         border-radius: 28px;
-         padding: 16px;
-         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-         background-color: #fcfcfc !important;
-       }
-
-       sampler-scaffold::shadow .action-button:hover:not(:active) {
-         box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2);
-       }
-    </style>
+  <link rel="import" href="components/font-roboto/roboto.html">
+  <link rel="import" href="components/paper-drawer-panel/paper-drawer-panel.html">
+  <link rel="import" href="components/paper-header-panel/paper-header-panel.html">
+  <link rel="import" href="components/paper-menu/paper-menu.html">
+  <link rel="import" href="components/paper-item/paper-item.html">
+  <link rel="import" href="components/paper-toolbar/paper-toolbar.html">
+  <link rel="import" href="components/paper-styles/paper-styles.html">
 </head>
-<body unresolved touch-action="auto">
-  <sampler-scaffold fit touch-action="auto">
-    <core-item label="Widgets" tag="nx-widget" url="nuxeo-widgets.html"></core-item>
-    <core-item label="Layouts" tag="nx-layout" url="nuxeo-layouts.html"></core-item>
-    <core-item label="Listing" tag="nx-listing" url="nuxeo-listings.html"></core-item>
-    <core-item label="Content View" tag="nx-content-view" url="nuxeo-content-views.html"></core-item>
-    <core-item label="REST" tag="nx-resource" url="nuxeo-resources.html"></core-item>
-    <core-item label="Multiple connections" tag="nx-connections" url="nuxeo-connections.html"></core-item>
-  </sampler-scaffold>
-  <script>
-    document.querySelector("sampler-scaffold").viewSourceAction = function() {
-      window.open(this.$.frame.contentWindow.location.href, this.item.tag);
-    };
-  </script>
+<body class="layout fullbleed">
+<template is="dom-bind" id="app">
+  <paper-drawer-panel id="drawerPanel">
+
+    <paper-menu id="menu" drawer attr-for-selected="url" selected="{{url}}">
+      <paper-item url="nuxeo-widgets.html">Widgets</paper-item>
+      <paper-item url="nuxeo-listings.html">Listing</paper-item>
+      <paper-item url="nuxeo-layouts.html">Layouts</paper-item>
+      <paper-item url="nuxeo-content-views.html">Content View</paper-item>
+      <paper-item url="nuxeo-resources.html">REST</paper-item>
+      <paper-item url="nuxeo-connections.html">Multiple connections</paper-item>
+    </paper-menu>
+
+    <iframe main class="layout flex" style="width:100%" src="[[url]]"></iframe>
+
+  </paper-drawer-panel>
+
+</template>
+<script>
+  document.querySelector('template').url= 'nuxeo-widgets.html';
+</script>
 </body>
 </html>
