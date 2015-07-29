@@ -14,11 +14,11 @@
     "select2": "3.5.2"
   },
   "homepage": "https://github.com/nuxeo/nuxeo-elements",
-  "_release": "9de65a59ad",
+  "_release": "4589088d1e",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "9de65a59ad5902cf86c8957f027e104f358a5d9c"
+    "commit": "4589088d1ee107947389ab62ed4a3f32bf4306a1"
   },
   "_source": "git://github.com/nuxeo/nuxeo-elements.git",
   "_target": "master",
